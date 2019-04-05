@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django.contrib.auth.models import User
 from django.db import models
 import uuid
@@ -18,8 +20,6 @@ def generateTransactionId():
 
 class Person(models.Model):
     cin = models.CharField(unique=True, blank=False, max_length=255)
-    first_name = models.CharField(blank=False, null=False, max_length=30)
-    last_name = models.CharField(blank=False, null=False, max_length=30)
     birthDate = models.DateField(null=False, blank=False)
     city = models.CharField(blank=False, null=False, max_length=30)
     state = models.CharField(blank=False, null=False, max_length=100)
@@ -33,14 +33,14 @@ class Employee(models.Model):
 
 class Client(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='person')
+    person = models.OneToOneField(Person, on_delete=models.CASCADE, related_name='person')
     creator = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True)
 
 class Account(models.Model):
     client = models.ForeignKey(Client, on_delete=models.SET_NULL, null=True, related_name='client')
     balance = models.DecimalField(decimal_places=2, max_digits=10, null=False, blank=False, default=0)
     credit_card = models.CharField(max_length=16, unique=True, blank=False, null=False, default=generateCreditCardNumber, auto_created=True)
-    expiration_date = models.DateField(default=now)
+    expiration_date = models.DateField(default=(now()+timedelta(days=(365*4))))
     data_opened = models.DateField(default=now)
     opening_balance = models.DecimalField(decimal_places=2, max_digits=10, null=False, blank=False, default=0)
 

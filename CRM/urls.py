@@ -9,5 +9,5 @@ app_name = 'crm'
 urlpatterns = [
     path('', views.Home.as_view(), name="home"),
     path('login/', views.Login.as_view(), name="login"),
-    path('me/', views.Me.as_view(), name="me")
+    path('logout/', views.Logout.as_view(), name="logout"),
 ]
