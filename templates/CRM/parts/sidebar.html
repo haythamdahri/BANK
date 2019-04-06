@@ -6,12 +6,18 @@
             <div class="nav-link">
                 <div class="user-wrapper">
                     <div class="profile-image">
-                        <img src="{% static 'CRM/images/faces/face1.jpg' %}" alt="profile image">
+                        <img src="{{ request.user.person.image.url }}" class="img-xs rounded-circle" alt="profile image">
                     </div>
                     <div class="text-wrapper">
-                        <p class="profile-name">Richard V.Welsh</p>
+                        <p class="profile-name">{{ request.user.person.full_name }}</p>
                         <div>
-                            <small class="designation text-muted">Manager</small>
+                            <small class="designation text-muted">
+                                {% if request.user.person.employe is not None %}
+                                    Employe
+                                {% else %}
+                                    Client
+                                {% endif %}
+                            </small>
                             <span class="status-indicator online"></span>
                         </div>
                     </div>
@@ -22,9 +28,21 @@
             </div>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="index.html">
-                <i class="menu-icon mdi mdi-television"></i>
-                <span class="menu-title">Dashboard</span>
+            <a class="nav-link" href="{% url 'crm:transactions' %}">
+                <i class="menu-icon mdi mdi-transfer"></i>
+                <span class="menu-title">Transactions</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'crm:withdrawals' %}">
+                <i class="menu-icon mdi mdi-minus-box-outline"></i>
+                <span class="menu-title">Retraits</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'crm:payments' %}">
+                <i class="menu-icon mdi mdi-plus-outline"></i>
+                <span class="menu-title">Versements</span>
             </a>
         </li>
         <li class="nav-item">

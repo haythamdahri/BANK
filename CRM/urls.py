@@ -10,4 +10,7 @@ urlpatterns = [
     path('', views.Home.as_view(), name="home"),
     path('login/', views.Login.as_view(), name="login"),
     path('logout/', views.Logout.as_view(), name="logout"),
+    path('transactions/', views.Transactions.as_view(), name="transactions"),
+    path('withdrawals/', views.Withdrawals.as_view(), name="withdrawals"),
+    path('payments/', views.Payments.as_view(), name="payments"),
 ]
