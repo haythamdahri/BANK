@@ -1,34 +1,39 @@
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.hashers import check_password
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.utils.decorators import method_decorator
+from django.utils.timezone import now
 from django.views.generic.base import View
-from CRM.forms import LoginForm
+from CRM.forms import LoginForm, TransactionForm
+
+# -------------------------- Acceuil --------------------------
+from CRM.models import Transaction, Client, Employee, Account, Withdrawal, Deposit, generateTransactionId
 
 
-#-------------------------- Acceuil --------------------------
-from CRM.models import Transaction, Client, Employee, Account, Withdrawal, Payment
-
-
-class Home(LoginRequiredMixin , View):
-
+class Home(LoginRequiredMixin, View):
     login_url = '/login/'
     redirect_field_name = 'next'
 
     def get(self, request, *args, **kwargs):
         context = dict()
+        client = Client()
+        try:
+            client = Client.objects.get(person_id=request.user.person.id)
+        except Client.DoesNotExist as ex:
+            client = None
         return render(request, 'CRM/index.html', context)
 
     def post(self, request, *args, **kwargs):
         return redirect('crm:home')
 
 
-#-------------------------- Connexion --------------------------
+# -------------------------- Connexion --------------------------
 class Login(View):
 
     def get(self, request, *args, **kwargs):
@@ -54,7 +59,7 @@ class Login(View):
         return redirect('crm:login')
 
 
-#-------------------------- Deconnexion --------------------------
+# -------------------------- Deconnexion --------------------------
 class Logout(LoginRequiredMixin, View):
 
     def get(self, request, *args, **kwargs):
@@ -66,7 +71,8 @@ class Logout(LoginRequiredMixin, View):
             messages.info(request, "Vous êtes déconnecté!")
         return redirect('crm:login')
 
-#-------------------------- Transactions --------------------------
+
+# -------------------------- Transactions --------------------------
 class Transactions(LoginRequiredMixin, View):
     login_url = '/login/'
     redirect_field_name = 'next'
@@ -81,11 +87,13 @@ class Transactions(LoginRequiredMixin, View):
         if client is not None:
             context = dict()
             accounts = Account.objects.filter(client_id=client.id)
-            context['transactions'] = Transaction.objects.filter(Q(sender_account__in=accounts)|Q(receiver_account__in=accounts))
+            context['transactions'] = Transaction.objects.filter(
+                Q(sender_account__in=accounts) | Q(receiver_account__in=accounts)).order_by('-date')
             return render(request, 'CRM/transactions.html', context)
         return redirect('crm:home')
 
-#-------------------------- Transactions --------------------------
+
+# -------------------------- Transactions --------------------------
 class Withdrawals(LoginRequiredMixin, View):
     login_url = '/login/'
     redirect_field_name = 'next'
@@ -105,8 +113,9 @@ class Withdrawals(LoginRequiredMixin, View):
             return render(request, 'CRM/withdrawals.html', context)
         return redirect('crm:home')
 
-#-------------------------- Transactions --------------------------
-class Payments(LoginRequiredMixin, View):
+
+# -------------------------- Transactions --------------------------
+class Deposits(LoginRequiredMixin, View):
     login_url = '/login/'
     redirect_field_name = 'next'
 
@@ -121,57 +130,46 @@ class Payments(LoginRequiredMixin, View):
             context = dict()
             accounts = Account.objects.filter(client_id=client.id)
             print(accounts)
-            context['payments'] = Payment.objects.filter(account__in=accounts)
-            return render(request, 'CRM/payments.html', context)
+            context['deposits'] = Deposit.objects.filter(account__in=accounts)
+            return render(request, 'CRM/deposits.html', context)
         return redirect('crm:home')
 
 
+# -------------------------- Add Transaction --------------------------
+class AddTransaction(LoginRequiredMixin, View):
+    login_url = '/login/'
+    redirect_field_name = 'next'
 
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        client = Client()
+        try:
+            client = Client.objects.get(person_id=user.person.id)
+        except Client.DoesNotExist as ex:
+            client = None
+        if client is not None:
+            context = dict()
+            context['transaction_form'] = TransactionForm()
+            return render(request, 'CRM/add-transaction.html', context)
+        return redirect('crm:home')
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        client = Client()
+        try:
+            client = Client.objects.get(person_id=user.person.id)
+        except Client.DoesNotExist as ex:
+            client = None
+        if client is not None:
+            context = dict()
+            form = TransactionForm(request.POST or None)
+            if form.is_valid():
+                password = form.cleaned_data.get('password')
+                if check_password(password, user.password):
+                    form.save()
+                    messages.success(request, "Transaction efféctuée avec succée")
+                    return redirect('crm:transactions')
+                form.add_error('password', 'Mot de passe invalide')
+            context['transaction_form'] = form
+            return render(request, 'CRM/add-transaction.html', context)
+        return redirect('crm:home')

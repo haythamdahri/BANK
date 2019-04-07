@@ -1,0 +1,118 @@
+{% extends 'CRM/base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Ajouter Une Transaction{% endblock %}
+
+{% block content %}
+    <div class="main-panel">
+        <div class="content-wrapper">
+            <div class="row">
+                <div class="col-lg-12 d-flex align-items-stretch">
+
+                    <div class="row flex-grow">
+                        <div class="col-12 grid-margin stretch-card">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h4 class="card-title">Transaction</h4>
+                                    <p class="card-description font-weight-bold display-4">
+                                        <i class="far fa-money-bill-alt"></i> Transfert d'argent
+                                    </p>
+
+                                    <form method="POST" action="{% url 'crm:add_transaction' %}">
+
+                                        {% csrf_token %}
+
+                                        {% render_field transaction_form.date type='hidden' %}
+                                        {% render_field transaction_form.number type='hidden' %}
+
+                                        <div class="form-group">
+                                            <label>Compte Emetteur</label>
+                                            <select name="sender_account"
+                                                    class="form-control form-control-sm {% if transaction_form.sender_account.errors %}is-invalid{% endif %}"
+                                                    required
+                                                    id="id_sender_account">
+                                                {% for account in transaction_form.sender_account.field.queryset %}
+                                                    {% if account.client.id == client.id %}
+                                                        <option value="{{ account.pk }}">
+                                                            Numero: {{ account.credit_card }} |
+                                                            Montant: {{ account.balance }} Dh
+                                                        </option>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </select>
+                                            {% for error in transaction_form.sender_account.errors %}
+                                                <small class="form-text text-danger font-weight-bold">
+                                                    <i class="fas fa-exclamation-triangle"></i> {{ error }}<br>
+                                                </small>
+                                            {% endfor %}
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Compte Recepteur</label>
+                                            <select name="receiver_account"
+                                                    class="form-control form-control-sm {% if transaction_form.receiver_account.errors %}is-invalid{% endif %}"
+                                                    required
+                                                    id="id_receiver_account">
+                                                {% for account in transaction_form.receiver_account.field.queryset %}
+                                                    <option value="{{ account.pk }}">
+                                                        Numero: {{ account.credit_card }} |
+                                                        Propriétaire: {{ account.client.person.full_name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                            {% for error in transaction_form.receiver_account.errors %}
+                                                <small class="form-text text-danger font-weight-bold">
+                                                    <i class="fas fa-exclamation-triangle"></i> {{ error }}<br>
+                                                </small>
+                                            {% endfor %}
+                                        </div>
+
+                                        <div class="form-group">
+                                            <div class="input-group">
+                                                <div class="input-group-prepend bg-primary border-primary">
+                                                    <span class="input-group-text bg-transparent text-white">DH</span>
+                                                </div>
+                                                {% if transaction_form.amount.errors %}
+                                                    {% render_field transaction_form.amount class='form-control is-invalid' %}
+                                                {% else %}
+                                                    {% render_field transaction_form.amount %}
+                                                {% endif %}
+                                                <div class="input-group-append bg-primary border-primary">
+                                                    <span class="input-group-text bg-transparent text-white">.00</span>
+                                                </div>
+                                            </div>
+                                            {% for error in transaction_form.amount.errors %}
+                                                <small class="form-text text-danger font-weight-bold">
+                                                    <i class="fas fa-exclamation-triangle"></i> {{ error }}<br>
+                                                </small>
+                                            {% endfor %}
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Mot de passe pour confirmer l'operation</label>
+                                            {% if transaction_form.password.errors %}
+                                                {% render_field transaction_form.password class='form-control is-invalid' %}
+                                            {% else %}
+                                                {% render_field transaction_form.password %}
+                                            {% endif %}
+                                            {% for error in transaction_form.password.errors %}
+                                                <small class="form-text text-danger font-weight-bold">
+                                                    <i class="fas fa-exclamation-triangle"></i> {{ error }}<br>
+                                                </small>
+                                            {% endfor %}
+                                        </div>
+
+                                        <button type="submit" class="btn btn-success mr-2">
+                                            <span class="mdi mdi-account-check"></span> Effectuer
+                                        </button>
+                                    </form>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

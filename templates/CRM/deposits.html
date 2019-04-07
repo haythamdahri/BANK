@@ -10,17 +10,17 @@
 
                     <div class="card">
                         <div class="card-body">
-                            <h4 class="card-title">Liste des transactions</h4>
+                            <h4 class="card-title">Liste des versements</h4>
 
                             <a href="">
                                 <button type="button" class="btn btn-success btn-fw">
-                                    <span class="mdi mdi-account-plus"></span> Ajouter un versement
+                                    <span class="mdi mdi-account-plus"></span> Verser l'argent
                                 </button>
                             </a>
                             <div class="table-responsive">
                                 <table class="table table-striped">
                                     <thead>
-                                    <tr>
+                                    <tr align="center">
                                         <th>
                                             Nom d'utilisateur
                                         </th>
@@ -39,15 +39,15 @@
                                     </tr>
                                     </thead>
                                     <tbody>
-                                    {% for payment in payments %}
-                                        <tr>
+                                    {% for deposit in deposits %}
+                                        <tr align="center">
                                             <td class="py-1">
-                                                <img src="{{ payment.account.client.person.image.url }}"
+                                                <img src="{{ deposit.account.client.person.image.url }}"
                                                      alt="image"/>
-                                                {{ payment.account.client.person.user.username }}
+                                                {{ deposit.account.client.person.user.username }}
                                             </td>
                                             <td>
-                                                {{ payment.account.client.person.full_name }}
+                                                {{ deposit.account.client.person.full_name }}
                                             </td>
                                             <td>
                                                 <div class="progress">
@@ -57,10 +57,10 @@
                                                 </div>
                                             </td>
                                             <td>
-                                                {{ payment.amount }} Dh
+                                                {{ deposit.amount }} Dh
                                             </td>
                                             <td>
-                                                {{ payment.date | date:"l d b Y" }}
+                                                {{ deposit.date | date:"l d b Y" }}
                                             </td>
                                         </tr>
                                     {% empty %}

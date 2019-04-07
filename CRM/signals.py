@@ -1,7 +1,7 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from CRM.models import Transaction,Withdrawal, Payment
+from CRM.models import Transaction,Withdrawal, Deposit
 
 #-------------------------- After transaction operation --------------------------
 @receiver(post_save, sender=Transaction)
@@ -24,7 +24,7 @@ def save_withdrawal(sender, instance, created, **kwargs):
 
 
 #-------------------------- After transaction operation --------------------------
-@receiver(post_save, sender=Payment)
+@receiver(post_save, sender=Deposit)
 def save_payment(sender, instance, created, **kwargs):
     if created:
         account = instance.account

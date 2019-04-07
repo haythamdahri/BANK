@@ -9,11 +9,18 @@
                 <div class="col-lg-12 grid-margin stretch-card">
                     <div class="card">
                         <div class="card-body">
-                            <h4 class="card-title">Liste des transactions</h4>
+                            <h4 class="card-title">Liste des retraits</h4>
+
+                            <a href="{% url 'crm:add_transaction' %}">
+                                <button type="button" class="btn btn-success btn-fw">
+                                    <span class="mdi mdi-tag-plus"></span> Retirer l'argent
+                                </button>
+                            </a>
+
                             <div class="table-responsive">
                                 <table class="table table-striped">
                                     <thead>
-                                    <tr>
+                                    <tr align="center">
                                         <th>
                                             Nom d'utilisateur
                                         </th>
@@ -33,7 +40,7 @@
                                     </thead>
                                     <tbody>
                                     {% for withdrawal in withdrawals %}
-                                        <tr>
+                                        <tr align="center">
                                             <td class="py-1">
                                                 <img src="{{ withdrawal.account.client.person.image.url }}"
                                                      alt="image"/>

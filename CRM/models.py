@@ -82,7 +82,7 @@ class Withdrawal(models.Model):
         return self.account.__str__() + " | " + self.number.__str__() + " | " + self.date.__str__() + " | " + self.amount.__str__()
 
 #------------------- Mettre de l'argent en compte -------------------
-class Payment(models.Model):
+class Deposit(models.Model):
     account = models.ForeignKey(Account, default=1, on_delete=models.SET_DEFAULT, related_name="payment_account")
     number = models.CharField(max_length=365000, null=False, blank=False, default=generateTransactionId)
     date = models.DateTimeField(default=now, null=False, blank=False)
