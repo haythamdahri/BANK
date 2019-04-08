@@ -23,10 +23,12 @@
                     <a href="#" class="nav-link">
                         <i class="mdi mdi-elevation-rise"></i>Reports</a>
                 </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link inline-group font-weight-bold">
-                        <i class="mdi mdi-account"></i>  {{ total_balance }}&nspar;Dh</a>
-                </li>
+                {% if client is not None %}
+                    <li class="nav-item">
+                        <a href="#" class="nav-link inline-group font-weight-bold">
+                            <i class="mdi mdi-account"></i> {{ total_balance }}&nspar;Dh</a>
+                    </li>
+                {% endif %}
             </ul>
             <ul class="navbar-nav navbar-nav-right">
                 <li class="nav-item dropdown d-none d-xl-inline-block">

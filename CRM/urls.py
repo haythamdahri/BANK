@@ -14,5 +14,5 @@ urlpatterns = [
     path('transactions/add', views.AddTransaction.as_view(), name="add_transaction"),
     path('withdrawals/', views.Withdrawals.as_view(), name="withdrawals"),
     path('withdrawals/add', views.AddWithdrawal.as_view(), name="add_withdrawal"),
-    path('deposits/', views.Deposits.as_view(), name="payments"),
+    path('deposits/', views.Deposits.as_view(), name="deposits"),
 ]

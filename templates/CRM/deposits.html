@@ -1,4 +1,5 @@
 {% extends 'CRM/base.html' %}
+{% load widget_tweaks %}
 
 {% block title %}Versements{% endblock %}
 
@@ -7,60 +8,61 @@
         <div class="content-wrapper">
             <div class="row">
                 <div class="col-lg-12 grid-margin stretch-card">
-
                     <div class="card">
-                        <div class="card-body">
-                            <h4 class="card-title">Liste des versements</h4>
+                        <div class="card-body row">
+                            <div class="col-6 col-md-6 col-lg-6 col-xl-6 col-sm-12">
+                                <h4 class="card-title">Liste des versements</h4>
+                            </div>
 
-                            <a href="">
-                                <button type="button" class="btn btn-success btn-fw">
-                                    <span class="mdi mdi-account-plus"></span> Verser l'argent
-                                </button>
-                            </a>
+                            <div class="col-6 col-md-6 col-lg-6 col-xl-6 col-sm-12">
+                                <form class="form-inline my-2 my-lg-0" method="GET"
+                                      action="{% url 'crm:deposits' %}">
+                                    {% render_field search_form.search %}
+                                    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">
+                                        <span class="mdi mdi-search-web"></span>Rechercher
+                                    </button>
+                                </form>
+                            </div>
+
+
+                            <div class="row mt-4">
+                                <div class="col-md-12">
+                                    {% include 'CRM/messages.html' %}
+                                </div>
+                            </div>
+
                             <div class="table-responsive">
                                 <table class="table table-striped">
                                     <thead>
                                     <tr align="center">
                                         <th>
-                                            Nom d'utilisateur
+                                            Numero du compte
                                         </th>
                                         <th>
-                                            Nom Complet
-                                        </th>
-                                        <th>
-                                            Progression
-                                        </th>
-                                        <th>
-                                            Montant
+                                            Numero de transaction
                                         </th>
                                         <th>
                                             Date d'operation
                                         </th>
+                                        <th>
+                                            Montant
+                                        </th>
                                     </tr>
                                     </thead>
                                     <tbody>
-                                    {% for deposit in deposits %}
+                                    {% for deposit in deposits.object_list %}
                                         <tr align="center">
                                             <td class="py-1">
-                                                <img src="{{ deposit.account.client.person.image.url }}"
-                                                     alt="image"/>
-                                                {{ deposit.account.client.person.user.username }}
+                                                {{ deposit.account.credit_card }}
                                             </td>
                                             <td>
-                                                {{ deposit.account.client.person.full_name }}
+                                                {{ deposit.number }}
                                             </td>
                                             <td>
-                                                <div class="progress">
-                                                    <div class="progress-bar bg-success" role="progressbar"
-                                                         style="width: 25%" aria-valuenow="25" aria-valuemin="0"
-                                                         aria-valuemax="100"></div>
-                                                </div>
+                                                {{ deposit.date | date:"l d b Y  G:i:s a" }}
                                             </td>
                                             <td>
                                                 {{ deposit.amount }} Dh
-                                            </td>
-                                            <td>
-                                                {{ deposit.date | date:"l d b Y" }}
                                             </td>
                                         </tr>
                                     {% empty %}
@@ -80,6 +82,45 @@
                     </div>
                 </div>
             </div>
+            {% if deposits.has_other_pages %}
+                <div class="row">
+                    <div class="col-12 text-center">
+                        <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                            {% if deposits.has_previous %}
+                                <div class="btn-group" role="group" aria-label="First group">
+                                    <a href="{% url 'crm:withdrawals' %}?page=1">
+                                        <button type="button" class="btn btn-light"><<</button>
+                                    </a>
+                                    <a href="{% url 'crm:withdrawals' %}?page={{ deposits.previous_page_number }}">
+                                        <button type="button" class="btn btn-light"><</button>
+                                    </a>
+                                </div>
+                            {% endif %}
+                            <div class="btn-group" role="group" aria-label="Second group">
+                                {% for page_num in deposits.paginator.page_range %}
+                                    {% if deposits.number == page_num %}
+                                        <button type="button" class="btn btn-primary active">{{ page_num }}</button>
+                                    {% else %}
+                                        <a href="{% url 'crm:withdrawals' %}?page={{ page_num }}">
+                                            <button type="button" class="btn btn-light">{{ page_num }}</button>
+                                        </a>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            {% if deposits.has_next %}
+                                <div class="btn-group" role="group" aria-label="Third group">
+                                    <a href="{% url 'crm:withdrawals' %}?page={{ deposits.next_page_number }}">
+                                        <button type="button" class="btn btn-light">></button>
+                                    </a>
+                                    <a href="{% url 'crm:withdrawals' %}?page={{ deposits.paginator.num_pages }}">
+                                        <button type="button" class="btn btn-light">>></button>
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
         </div>
     </div>
 {% endblock %}

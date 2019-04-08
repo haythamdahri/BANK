@@ -130,3 +130,5 @@ MEDIA_ROOT = 'media/'
 # Login backend
 AUTHENTICATION_BACKENDS = ['CRM.backends.ModelBackend']
 
+# Weather API KEY
+API_KEY = 'a72a8a2eb463bdd3784614fc52229a70'

@@ -1,10 +1,12 @@
+import requests
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
-from django.db.models import Q
+from django.db.models import Q, Avg
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.urls import reverse
@@ -15,7 +17,12 @@ from CRM.forms import LoginForm, TransactionForm, SearchForm, WithdrawalForm
 from CRM.models import Transaction, Client, Employee, Account, Withdrawal, Deposit, generateTransactionId
 
 # -------------------------- Acceuil --------------------------
-from CRM.tasks import generate_withrawals
+from CRM.tasks import generate_withrawals, generate_deposits
+
+def getWeatherData():
+    api_key = settings.API_KEY
+    url = f'https://samples.openweathermap.org/data/2.5/forecast?id=524901&appid={api_key}'
+    return requests.get(url)
 
 
 class Home(LoginRequiredMixin, View):
@@ -23,12 +30,32 @@ class Home(LoginRequiredMixin, View):
     redirect_field_name = 'next'
 
     def get(self, request, *args, **kwargs):
+        #------------- Weather Data -------------
+        weathers = getWeatherData()
+        print(weathers)
+
         context = dict()
         client = Client()
         try:
             client = Client.objects.get(person_id=request.user.person.id)
         except Client.DoesNotExist as ex:
             client = None
+        if client is not None:
+            transactions = Transaction.objects.filter(
+                sender_account__in=Account.objects.filter(client_id=client.id))
+            context['transactions_amount'] = round(transactions.aggregate(Avg('amount'))['amount__avg'], 2)
+            context['transactions_count'] = transactions.count()
+
+            withdrawals = Withdrawal.objects.filter(
+                account__in=Account.objects.filter(client_id=client.id))
+            context['withdrawals_amount'] = round(withdrawals.aggregate(Avg('amount'))['amount__avg'], 2)
+            context['withdrawals_count'] = withdrawals.count()
+
+            deposits = Deposit.objects.filter(
+                account__in=Account.objects.filter(client_id=client.id))
+            context['deposits_amount'] = round(deposits.aggregate(Avg('amount'))['amount__avg'], 2)
+            context['deposits_count'] = deposits.count()
+
         return render(request, 'CRM/index.html', context)
 
     def post(self, request, *args, **kwargs):
@@ -132,7 +159,8 @@ class Withdrawals(LoginRequiredMixin, View):
             accounts = Account.objects.filter(client_id=client.id)
             search_form = SearchForm(request.GET or None)
             if search_form.is_valid():
-                withdrawals = Withdrawal.objects.filter(account__in=accounts, number=search_form.cleaned_data['search']).order_by('-date')
+                withdrawals = Withdrawal.objects.filter(account__in=accounts,
+                                                        number=search_form.cleaned_data['search']).order_by('-date')
             else:
                 withdrawals = Withdrawal.objects.filter(account__in=accounts).order_by('-date')
 
@@ -158,6 +186,7 @@ class Deposits(LoginRequiredMixin, View):
     redirect_field_name = 'next'
 
     def get(self, request, *args, **kwargs):
+        # generate_deposits(150)
         user = request.user
         client = Client()
         try:
@@ -167,8 +196,25 @@ class Deposits(LoginRequiredMixin, View):
         if client is not None:
             context = dict()
             accounts = Account.objects.filter(client_id=client.id)
-            print(accounts)
-            context['deposits'] = Deposit.objects.filter(account__in=accounts)
+            search_form = SearchForm(request.GET or None)
+            if search_form.is_valid():
+                deposits = Deposit.objects.filter(account__in=accounts,
+                                                  number=search_form.cleaned_data['search']).order_by('-date')
+            else:
+                deposits = Deposit.objects.filter(account__in=accounts).order_by('-date')
+
+            # ------------- Get requested page -------------
+            page = request.GET.get('page', 1)
+            paginator = Paginator(deposits, 50)
+            try:
+                deposits = paginator.page(page)
+            except PageNotAnInteger:
+                deposits = paginator.page(1)
+            except EmptyPage:
+                deposits = paginator.page(paginator.num_pages)
+
+            context['search_form'] = search_form
+            context['deposits'] = deposits
             return render(request, 'CRM/deposits.html', context)
         return redirect('crm:home')
 

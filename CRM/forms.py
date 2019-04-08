@@ -1,5 +1,5 @@
 from django import forms
-from CRM.models import Transaction, Account, Withdrawal
+from CRM.models import Transaction, Account, Withdrawal, Deposit
 import re
 
 
@@ -65,3 +65,21 @@ class WithdrawalForm(forms.ModelForm):
             self.add_error('amount', 'Montant invalide (100 < Montant < 3000)')
         elif amount > account.balance:
             self.add_error('amount', 'Le montant saisi est indisponible dans le compte selectionné!')
+
+class DepositForm(forms.ModelForm):
+    accounts_choices = [(account.id, account) for account in Account.objects.all()]
+    account = forms.ModelChoiceField(required=True, queryset=Account.objects.all(), widget=forms.Select(attrs={"class": "form-control form-control-sm"}))
+    amount = forms.DecimalField(required=True, widget=forms.NumberInput(attrs={"class":"form-control", "placeholder": "999.99"}))
+    password = forms.CharField(required=True, widget=forms.PasswordInput(attrs={"class": "form-control", "placeholder": "Mot de passe..."}))
+
+    class Meta:
+        model = Deposit
+        fields = ['amount', 'account']
+
+    def clean(self):
+        cleaned_data = super().clean()
+        account = cleaned_data.get('account')
+        amount = cleaned_data.get('amount')
+        print(f"Account: {account}")
+        if amount <= 100 or amount > 3000:
+            self.add_error('amount', 'Montant invalide (100 < Montant < 3000)')
