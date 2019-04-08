@@ -1,10 +1,6 @@
 from django import forms
+from CRM.models import Transaction, Account, Withdrawal
 import re
-
-from django.contrib.auth.hashers import check_password
-from django.contrib.auth.models import User
-
-from CRM.models import Transaction, Account
 
 
 class LoginForm(forms.Form):
@@ -31,7 +27,7 @@ class TransactionForm(forms.ModelForm):
 
     class Meta:
         model = Transaction
-        fields = '__all__'
+        exclude = ['date', 'number']
 
     def clean(self):
         cleaned_data = super().clean()
@@ -43,3 +39,29 @@ class TransactionForm(forms.ModelForm):
             self.add_error('receiver_account', 'Le compte émetteur et le compte récepteur sont les mémes.')
         if amount <= 200 or amount > 5000:
             self.add_error('amount', 'Montant invalide (250 < Montant < 5000)')
+        if sender_account.balance <= amount:
+            self.add_error('sender_account', 'Le compte selectionné ne dispose pas d\'un montant suffisant!')
+
+class SearchForm(forms.Form):
+    search = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control mr-sm-2', 'type': 'search', 'placeholder': 'Numero de transaction ...', 'aria-label': 'Search'}), required=True)
+
+
+class WithdrawalForm(forms.ModelForm):
+    accounts_choices = [(account.id, account) for account in Account.objects.all()]
+    account = forms.ModelChoiceField(required=True, queryset=Account.objects.all(), widget=forms.Select(attrs={"class": "form-control form-control-sm"}))
+    amount = forms.DecimalField(required=True, widget=forms.NumberInput(attrs={"class":"form-control", "placeholder": "999.99"}))
+    password = forms.CharField(required=True, widget=forms.PasswordInput(attrs={"class": "form-control", "placeholder": "Mot de passe..."}))
+
+    class Meta:
+        model = Withdrawal
+        fields = ['amount', 'account']
+
+    def clean(self):
+        cleaned_data = super().clean()
+        account = cleaned_data.get('account')
+        amount = cleaned_data.get('amount')
+        print(f"Account: {account}")
+        if amount <= 100 or amount > 3000:
+            self.add_error('amount', 'Montant invalide (100 < Montant < 3000)')
+        elif amount > account.balance:
+            self.add_error('amount', 'Le montant saisi est indisponible dans le compte selectionné!')

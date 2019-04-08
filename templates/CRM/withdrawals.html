@@ -1,4 +1,5 @@
 {% extends 'CRM/base.html' %}
+{% load widget_tweaks %}
 
 {% block title %}Retraits{% endblock %}
 
@@ -9,58 +10,65 @@
                 <div class="col-lg-12 grid-margin stretch-card">
                     <div class="card">
                         <div class="card-body">
-                            <h4 class="card-title">Liste des retraits</h4>
+                            <div class="row">
+                                <div class="col-6 col-md-6 col-lg-6 col-xl-6 col-sm-12">
+                                    <h4 class="card-title">Liste des retraits</h4>
+                                </div>
 
-                            <a href="{% url 'crm:add_transaction' %}">
+                                <div class="col-6 col-md-6 col-lg-6 col-xl-6 col-sm-12">
+                                    <form class="form-inline my-2 my-lg-0" method="GET"
+                                          action="{% url 'crm:withdrawals' %}">
+                                        {% render_field search_form.search %}
+                                        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">
+                                            <span class="mdi mdi-search-web"></span>Rechercher
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                            <a href="{% url 'crm:add_withdrawal' %}">
                                 <button type="button" class="btn btn-success btn-fw">
                                     <span class="mdi mdi-tag-plus"></span> Retirer l'argent
                                 </button>
                             </a>
+
+                            <div class="row mt-4">
+                                <div class="col-md-12">
+                                    {% include 'CRM/messages.html' %}
+                                </div>
+                            </div>
 
                             <div class="table-responsive">
                                 <table class="table table-striped">
                                     <thead>
                                     <tr align="center">
                                         <th>
-                                            Nom d'utilisateur
+                                            Numero du compte
                                         </th>
                                         <th>
-                                            Nom Complet
-                                        </th>
-                                        <th>
-                                            Progression
-                                        </th>
-                                        <th>
-                                            Montant
+                                            Numero de transaction
                                         </th>
                                         <th>
                                             Date d'operation
                                         </th>
+                                        <th>
+                                            Montant
+                                        </th>
                                     </tr>
                                     </thead>
                                     <tbody>
-                                    {% for withdrawal in withdrawals %}
+                                    {% for withdrawal in withdrawals.object_list %}
                                         <tr align="center">
                                             <td class="py-1">
-                                                <img src="{{ withdrawal.account.client.person.image.url }}"
-                                                     alt="image"/>
-                                                {{ withdrawal.account.client.person.user.username }}
+                                                {{ withdrawal.account.credit_card }}
                                             </td>
                                             <td>
-                                                {{ withdrawal.account.client.person.full_name }}
+                                                {{ withdrawal.number }}
                                             </td>
                                             <td>
-                                                <div class="progress">
-                                                    <div class="progress-bar bg-success" role="progressbar"
-                                                         style="width: 25%" aria-valuenow="25" aria-valuemin="0"
-                                                         aria-valuemax="100"></div>
-                                                </div>
+                                                {{ withdrawal.date | date:"l d b Y  G:i:s a" }}
                                             </td>
                                             <td>
                                                 {{ withdrawal.amount }} Dh
-                                            </td>
-                                            <td>
-                                                {{ withdrawal.date | date:"l d b Y" }}
                                             </td>
                                         </tr>
                                     {% empty %}
@@ -80,6 +88,45 @@
                     </div>
                 </div>
             </div>
+            {% if withdrawals.has_other_pages %}
+                <div class="row">
+                    <div class="col-12 text-center">
+                        <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                            {% if withdrawals.has_previous %}
+                                <div class="btn-group" role="group" aria-label="First group">
+                                    <a href="{% url 'crm:withdrawals' %}?page=1">
+                                        <button type="button" class="btn btn-light"><<</button>
+                                    </a>
+                                    <a href="{% url 'crm:withdrawals' %}?page={{ withdrawals.previous_page_number }}">
+                                        <button type="button" class="btn btn-light"><</button>
+                                    </a>
+                                </div>
+                            {% endif %}
+                            <div class="btn-group" role="group" aria-label="Second group">
+                                {% for page_num in withdrawals.paginator.page_range %}
+                                    {% if withdrawals.number == page_num %}
+                                        <button type="button" class="btn btn-primary active">{{ page_num }}</button>
+                                    {% else %}
+                                        <a href="{% url 'crm:withdrawals' %}?page={{ page_num }}">
+                                            <button type="button" class="btn btn-light">{{ page_num }}</button>
+                                        </a>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            {% if withdrawals.has_next %}
+                                <div class="btn-group" role="group" aria-label="Third group">
+                                    <a href="{% url 'crm:withdrawals' %}?page={{ withdrawals.next_page_number }}">
+                                        <button type="button" class="btn btn-light">></button>
+                                    </a>
+                                    <a href="{% url 'crm:withdrawals' %}?page={{ withdrawals.paginator.num_pages }}">
+                                        <button type="button" class="btn btn-light">>></button>
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
         </div>
     </div>
 {% endblock %}

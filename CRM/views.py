@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db.models import Q
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
@@ -10,10 +11,11 @@ from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.utils.timezone import now
 from django.views.generic.base import View
-from CRM.forms import LoginForm, TransactionForm
+from CRM.forms import LoginForm, TransactionForm, SearchForm, WithdrawalForm
+from CRM.models import Transaction, Client, Employee, Account, Withdrawal, Deposit, generateTransactionId
 
 # -------------------------- Acceuil --------------------------
-from CRM.models import Transaction, Client, Employee, Account, Withdrawal, Deposit, generateTransactionId
+from CRM.tasks import generate_withrawals
 
 
 class Home(LoginRequiredMixin, View):
@@ -87,8 +89,27 @@ class Transactions(LoginRequiredMixin, View):
         if client is not None:
             context = dict()
             accounts = Account.objects.filter(client_id=client.id)
-            context['transactions'] = Transaction.objects.filter(
-                Q(sender_account__in=accounts) | Q(receiver_account__in=accounts)).order_by('-date')
+            search_form = SearchForm(request.GET or None)
+            if search_form.is_valid():
+                transactions = Transaction.objects.filter(
+                    Q(sender_account__in=accounts) | Q(receiver_account__in=accounts),
+                    number=search_form.cleaned_data['search']).order_by('-date')
+            else:
+                transactions = Transaction.objects.filter(
+                    Q(sender_account__in=accounts) | Q(receiver_account__in=accounts)).order_by('-date')
+
+            # ------------- Get requested page -------------
+            page = request.GET.get('page', 1)
+            paginator = Paginator(transactions, 5)
+            try:
+                transactions = paginator.page(page)
+            except PageNotAnInteger:
+                transactions = paginator.page(1)
+            except EmptyPage:
+                transactions = paginator.page(paginator.num_pages)
+
+            context['search_form'] = search_form
+            context['transactions'] = transactions
             return render(request, 'CRM/transactions.html', context)
         return redirect('crm:home')
 
@@ -100,6 +121,7 @@ class Withdrawals(LoginRequiredMixin, View):
 
     def get(self, request, *args, **kwargs):
         user = request.user
+        # generate_withrawals(120)
         client = Client()
         try:
             client = Client.objects.get(person_id=user.person.id)
@@ -108,8 +130,24 @@ class Withdrawals(LoginRequiredMixin, View):
         if client is not None:
             context = dict()
             accounts = Account.objects.filter(client_id=client.id)
-            client = request.user.person
-            context['withdrawals'] = Withdrawal.objects.filter(account__in=accounts)
+            search_form = SearchForm(request.GET or None)
+            if search_form.is_valid():
+                withdrawals = Withdrawal.objects.filter(account__in=accounts, number=search_form.cleaned_data['search']).order_by('-date')
+            else:
+                withdrawals = Withdrawal.objects.filter(account__in=accounts).order_by('-date')
+
+            # ------------- Get requested page -------------
+            page = request.GET.get('page', 1)
+            paginator = Paginator(withdrawals, 50)
+            try:
+                withdrawals = paginator.page(page)
+            except PageNotAnInteger:
+                withdrawals = paginator.page(1)
+            except EmptyPage:
+                withdrawals = paginator.page(paginator.num_pages)
+
+            context['search_form'] = search_form
+            context['withdrawals'] = withdrawals
             return render(request, 'CRM/withdrawals.html', context)
         return redirect('crm:home')
 
@@ -172,4 +210,44 @@ class AddTransaction(LoginRequiredMixin, View):
                 form.add_error('password', 'Mot de passe invalide')
             context['transaction_form'] = form
             return render(request, 'CRM/add-transaction.html', context)
+        return redirect('crm:home')
+
+
+# -------------------------- Add Transaction --------------------------
+class AddWithdrawal(LoginRequiredMixin, View):
+    login_url = '/login/'
+    redirect_field_name = 'next'
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        client = Client()
+        try:
+            client = Client.objects.get(person_id=user.person.id)
+        except Client.DoesNotExist as ex:
+            client = None
+        if client is not None:
+            context = dict()
+            context['withdrawal_form'] = WithdrawalForm()
+            return render(request, 'CRM/add-withdarawal.html', context)
+        return redirect('crm:home')
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        client = Client()
+        try:
+            client = Client.objects.get(person_id=user.person.id)
+        except Client.DoesNotExist as ex:
+            client = None
+        if client is not None:
+            context = dict()
+            form = WithdrawalForm(request.POST or None)
+            if form.is_valid():
+                password = form.cleaned_data.get('password')
+                if check_password(password, user.password):
+                    form.save()
+                    messages.success(request, "Retrait efféctué avec succée")
+                    return redirect('crm:withdrawals')
+                form.add_error('password', 'Mot de passe invalide')
+            context['withdrawal_form'] = form
+            return render(request, 'CRM/add-withdarawal.html', context)
         return redirect('crm:home')

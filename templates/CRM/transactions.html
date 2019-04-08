@@ -1,4 +1,5 @@
 {% extends 'CRM/base.html' %}
+{% load widget_tweaks %}
 
 {% block title %}Transactions{% endblock %}
 
@@ -9,7 +10,20 @@
                 <div class="col-lg-12 grid-margin stretch-card">
                     <div class="card">
                         <div class="card-body">
-                            <h4 class="card-title">Liste des transactions</h4>
+                            <div class="row">
+                                <div class="col-6 col-md-6 col-lg-6 col-xl-6 col-sm-12">
+                                    <h4 class="card-title">Liste des transactions</h4>
+                                </div>
+
+                                <div class="col-6 col-md-6 col-lg-6 col-xl-6 col-sm-12">
+                                    <form class="form-inline my-2 my-lg-0" method="GET" action="{% url 'crm:transactions' %}">
+                                        {% render_field search_form.search %}
+                                        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">
+                                            <span class="mdi mdi-search-web"></span>Rechercher
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
 
                             <a href="{% url 'crm:add_transaction' %}">
                                 <button type="button" class="btn btn-success btn-fw">
@@ -45,20 +59,22 @@
                                     </tr>
                                     </thead>
                                     <tbody>
-                                    {% for transaction in transactions %}
+                                    {% for transaction in transactions.object_list %}
                                         {% include 'CRM/parts/transaction_modal.html' %}
                                         <tr>
                                             <td class="py-1">
                                                 <span class="mdi mdi-account"></span>{{ transaction.number }}
                                             </td>
                                             <td align="center">
-                                                <a href="javascript:void(0)"  data-toggle="modal" data-target="#senderModal{{ transaction.pk }}">
+                                                <a href="javascript:void(0)" data-toggle="modal"
+                                                   data-target="#senderModal{{ transaction.pk }}">
                                                     <img src="{{ transaction.sender_account.client.person.image.url }}"
                                                          alt="{{ transaction.sender_account.client.person.full_name }}"> {{ transaction.sender_account.credit_card }}
                                                 </a>
                                             </td>
                                             <td align="center">
-                                                <a href="javascript:void(0)"  data-toggle="modal" data-target="#receiverModal{{ transaction.pk }}">
+                                                <a href="javascript:void(0)" data-toggle="modal"
+                                                   data-target="#receiverModal{{ transaction.pk }}">
                                                     <img src="{{ transaction.receiver_account.client.person.image.url }}"
                                                          alt="{{ transaction.receiver_account.client.person.full_name }}"> {{ transaction.receiver_account.credit_card }}
                                                 </a>
@@ -67,7 +83,7 @@
                                                 {{ transaction.amount }} Dh
                                             </td>
                                             <td align="center">
-                                                {{ transaction.date | date:"l d b Y" }}
+                                                {{ transaction.date | date:"l d b Y  G:i:s a" }}
                                             </td>
                                         </tr>
                                     {% empty %}
@@ -87,6 +103,45 @@
                     </div>
                 </div>
             </div>
+            {% if transactions.has_other_pages %}
+                <div class="row">
+                    <div class="col-12 text-center">
+                        <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                            {% if transactions.has_previous %}
+                                <div class="btn-group" role="group" aria-label="First group">
+                                    <a href="{% url 'crm:transactions' %}?page=1">
+                                        <button type="button" class="btn btn-light"><<</button>
+                                    </a>
+                                    <a href="{% url 'crm:transactions' %}?page={{ transactions.previous_page_number }}">
+                                        <button type="button" class="btn btn-light"><</button>
+                                    </a>
+                                </div>
+                            {% endif %}
+                            <div class="btn-group" role="group" aria-label="Second group">
+                                {% for page_num in transactions.paginator.page_range %}
+                                    {% if transactions.number == page_num %}
+                                        <button type="button" class="btn btn-primary active">{{ page_num }}</button>
+                                    {% else %}
+                                        <a href="{% url 'crm:transactions' %}?page={{ page_num }}">
+                                            <button type="button" class="btn btn-light">{{ page_num }}</button>
+                                        </a>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            {% if transactions.has_next %}
+                                <div class="btn-group" role="group" aria-label="Third group">
+                                    <a href="{% url 'crm:transactions' %}?page={{ transactions.next_page_number }}">
+                                        <button type="button" class="btn btn-light">></button>
+                                    </a>
+                                    <a href="{% url 'crm:transactions' %}?page={{ transactions.paginator.num_pages }}">
+                                        <button type="button" class="btn btn-light">>></button>
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
         </div>
     </div>
 {% endblock %}
