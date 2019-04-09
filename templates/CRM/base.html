@@ -50,7 +50,8 @@
                                             <div class="float-right">
                                                 <p class="mb-0 text-right">Montant totale des comptes</p>
                                                 <div class="fluid-container">
-                                                    <h3 class="font-weight-bold text-right mb-0">{{ total_balance.normalize }} Dhs</h3>
+                                                    <h3 class="font-weight-bold text-right mb-0">{{ total_balance.normalize }}
+                                                        Dhs</h3>
                                                 </div>
                                             </div>
                                         </div>
@@ -72,7 +73,8 @@
                                             </div>
                                         </div>
                                         <p class="text-muted mt-3 mb-0">
-                                            <i class="mdi mdi-bookmark-outline mr-1" aria-hidden="true"></i> {{ transactions_amount }} Dhs
+                                            <i class="mdi mdi-bookmark-outline mr-1"
+                                               aria-hidden="true"></i> {{ transactions_amount }} Dhs
                                         </p>
                                     </div>
                                 </div>
@@ -92,7 +94,8 @@
                                             </div>
                                         </div>
                                         <p class="text-muted mt-3 mb-0">
-                                            <i class="mdi mdi-calendar mr-1" aria-hidden="true"></i> {{ withdrawals_amount }} Dhs
+                                            <i class="mdi mdi-calendar mr-1"
+                                               aria-hidden="true"></i> {{ withdrawals_amount }} Dhs
                                         </p>
                                     </div>
                                 </div>
@@ -112,7 +115,8 @@
                                             </div>
                                         </div>
                                         <p class="text-muted mt-3 mb-0">
-                                            <i class="mdi mdi-reload mr-1" aria-hidden="true"></i> {{ deposits_amount }} Dhs
+                                            <i class="mdi mdi-reload mr-1" aria-hidden="true"></i> {{ deposits_amount }}
+                                            Dhs
                                         </p>
                                     </div>
                                 </div>
@@ -122,91 +126,58 @@
                             <div class="col-lg-7 grid-margin stretch-card">
                                 <!--weather card-->
                                 <div class="card card-weather">
+
                                     <div class="card-body">
                                         <div class="weather-date-location">
-                                            <h3>Monday</h3>
+                                            <h3>{{ city_weather.today|date:'l'|upper }}</h3>
                                             <p class="text-gray">
-                                                <span class="weather-date">25 October, 2016</span>
-                                                <span class="weather-location">London, UK</span>
+                                                <span class="weather-date">{{ date }}</span>
+                                                <span class="weather-location">{{ city_weather.city }}</span>
                                             </p>
                                         </div>
                                         <div class="weather-data d-flex">
                                             <div class="mr-auto">
-                                                <h4 class="display-3">21
+                                                <h4 class="display-3">{{ city_weather.temperature }}
                                                     <span class="symbol">&deg;</span>C</h4>
                                                 <p>
-                                                    Mostly Cloudy
+                                                    {{ city_weather.description }}
                                                 </p>
                                             </div>
                                         </div>
                                     </div>
+
                                     <div class="card-body p-0">
                                         <div class="d-flex weakly-weather">
                                             <div class="weakly-weather-item">
                                                 <p class="mb-0">
-                                                    Sun
+                                                    Humidité
                                                 </p>
-                                                <i class="mdi mdi-weather-cloudy"></i>
+                                                <i class="mdi fa-jsfiddle"></i>
                                                 <p class="mb-0">
-                                                    30°
+                                                    {{ city_weather.humidity }}
                                                 </p>
                                             </div>
                                             <div class="weakly-weather-item">
                                                 <p class="mb-1">
-                                                    Mon
+                                                    lever du soleil
                                                 </p>
-                                                <i class="mdi mdi-weather-hail"></i>
+                                                <i class="mdi mdi-weather-sunny"></i>
                                                 <p class="mb-0">
-                                                    31°
+                                                    {{ city_weather.sunrise }}
                                                 </p>
                                             </div>
-                                            <div class="weakly-weather-item">
+                                            <div class="weakly-weather-item" style="text-align: center;">
                                                 <p class="mb-1">
-                                                    Tue
+                                                    coucher du soleil
                                                 </p>
-                                                <i class="mdi mdi-weather-partlycloudy"></i>
+                                                <i class="mdi mdi-weather-sunset"></i>
                                                 <p class="mb-0">
-                                                    28°
-                                                </p>
-                                            </div>
-                                            <div class="weakly-weather-item">
-                                                <p class="mb-1">
-                                                    Wed
-                                                </p>
-                                                <i class="mdi mdi-weather-pouring"></i>
-                                                <p class="mb-0">
-                                                    30°
-                                                </p>
-                                            </div>
-                                            <div class="weakly-weather-item">
-                                                <p class="mb-1">
-                                                    Thu
-                                                </p>
-                                                <i class="mdi mdi-weather-pouring"></i>
-                                                <p class="mb-0">
-                                                    29°
-                                                </p>
-                                            </div>
-                                            <div class="weakly-weather-item">
-                                                <p class="mb-1">
-                                                    Fri
-                                                </p>
-                                                <i class="mdi mdi-weather-snowy-rainy"></i>
-                                                <p class="mb-0">
-                                                    31°
-                                                </p>
-                                            </div>
-                                            <div class="weakly-weather-item">
-                                                <p class="mb-1">
-                                                    Sat
-                                                </p>
-                                                <i class="mdi mdi-weather-snowy"></i>
-                                                <p class="mb-0">
-                                                    32°
+                                                    {{ city_weather.sunset }}
                                                 </p>
                                             </div>
                                         </div>
                                     </div>
+
                                 </div>
                                 <!--weather card ends-->
                             </div>

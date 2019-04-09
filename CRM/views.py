@@ -15,24 +15,39 @@ from django.utils.timezone import now
 from django.views.generic.base import View
 from CRM.forms import LoginForm, TransactionForm, SearchForm, WithdrawalForm
 from CRM.models import Transaction, Client, Employee, Account, Withdrawal, Deposit, generateTransactionId
+from datetime import datetime, timedelta
 
 # -------------------------- Acceuil --------------------------
 from CRM.tasks import generate_withrawals, generate_deposits
 
-def getWeatherData():
+def getWeatherData(city):
+    defaultçcity = 'Casablanca'
     api_key = settings.API_KEY
-    url = f'https://samples.openweathermap.org/data/2.5/forecast?id=524901&appid={api_key}'
-    return requests.get(url)
-
+    url = 'http://api.openweathermap.org/data/2.5/weather?q={}&units=metric&appid={}&lang=fr'
+    response = requests.get(url.format(city, api_key)).json()
+    if response['cod'] is None or response['cod'] == '404':
+        response = requests.get(url.format(defaultçcity, api_key)).json()
+    return response
 
 class Home(LoginRequiredMixin, View):
     login_url = '/login/'
     redirect_field_name = 'next'
 
     def get(self, request, *args, **kwargs):
+        city = request.user.person.city
         #------------- Weather Data -------------
-        weathers = getWeatherData()
-        print(weathers)
+        r = getWeatherData(city)
+        city_weather = {
+            'city': r['name'],
+            'country': r['sys']['country'],
+            'humidity': r['main']['humidity'],
+            'temperature': r['main']['temp'],
+            'description': r['weather'][0]['description'],
+            'icon': r['weather'][0]['icon'],
+            'sunrise': (timedelta(hours=1)+datetime.utcfromtimestamp(int(r['sys']['sunrise']))).strftime('%H:%M:%S'),
+            'sunset': (timedelta(hours=1)+datetime.utcfromtimestamp(int(r['sys']['sunset']))).strftime('%H:%M:%S'),
+            'today': datetime.now()
+        }
 
         context = dict()
         client = Client()
@@ -56,6 +71,7 @@ class Home(LoginRequiredMixin, View):
             context['deposits_amount'] = round(deposits.aggregate(Avg('amount'))['amount__avg'], 2)
             context['deposits_count'] = deposits.count()
 
+        context['city_weather'] = city_weather
         return render(request, 'CRM/index.html', context)
 
     def post(self, request, *args, **kwargs):
