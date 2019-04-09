@@ -21,7 +21,7 @@ def generateTransactionId():
 class Person(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     cin = models.CharField(unique=True, blank=False, max_length=255)
-    birthDate = models.DateField(null=False, blank=False)
+    birth_date = models.DateField(null=False, blank=False)
     city = models.CharField(blank=False, null=False, max_length=30)
     state = models.CharField(blank=False, null=False, max_length=100)
     nationality = models.CharField(blank=False, null=False, max_length=150)

@@ -6,14 +6,14 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
-from django.db.models import Q, Avg
+from django.db.models import Q, Avg, Sum
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.utils.timezone import now
 from django.views.generic.base import View
-from CRM.forms import LoginForm, TransactionForm, SearchForm, WithdrawalForm
+from CRM.forms import LoginForm, TransactionForm, SearchForm, WithdrawalForm, ClientSearchForm, ClientCustomForm
 from CRM.models import Transaction, Client, Employee, Account, Withdrawal, Deposit, generateTransactionId
 from datetime import datetime, timedelta
 
@@ -58,18 +58,49 @@ class Home(LoginRequiredMixin, View):
         if client is not None:
             transactions = Transaction.objects.filter(
                 sender_account__in=Account.objects.filter(client_id=client.id))
-            context['transactions_amount'] = round(transactions.aggregate(Avg('amount'))['amount__avg'], 2)
+            transactions_amount = transactions.aggregate(Avg('amount'))['amount__avg']
+            context['transactions_amount'] = round( transactions_amount if transactions_amount is not None else 0, 2)
             context['transactions_count'] = transactions.count()
 
             withdrawals = Withdrawal.objects.filter(
                 account__in=Account.objects.filter(client_id=client.id))
-            context['withdrawals_amount'] = round(withdrawals.aggregate(Avg('amount'))['amount__avg'], 2)
+            withdrawals_amount = withdrawals.aggregate(Avg('amount'))['amount__avg']
+            context['withdrawals_amount'] = round( withdrawals_amount if withdrawals_amount is not None else 0, 2)
             context['withdrawals_count'] = withdrawals.count()
 
             deposits = Deposit.objects.filter(
                 account__in=Account.objects.filter(client_id=client.id))
-            context['deposits_amount'] = round(deposits.aggregate(Avg('amount'))['amount__avg'], 2)
+            deposits_amount = withdrawals.aggregate(Avg('amount'))['amount__avg']
+            context['deposits_amount'] = round(deposits_amount if deposits_amount is not None else 0, 2)
             context['deposits_count'] = deposits.count()
+        else:
+            total_balance = nb_transactions = nb_deposits = nb_withdrawals = transactions_balance = deposits_balance = withdrawals_balance = 0
+            employee = Employee.objects.filter(person_id=request.user.person.id)[0]
+            for account in Account.objects.filter(client__in=Client.objects.filter(creator=employee)):
+                total_balance += account.balance
+
+                temp_transactions = Transaction.objects.filter(Q(sender_account=account)|Q(receiver_account=account))
+                nb_transactions += temp_transactions.count()
+                t_b = temp_transactions.aggregate(Sum('amount'))['amount__sum']
+                transactions_balance += t_b if t_b is not None else 0
+
+                temp_deposits = Deposit.objects.filter(account=account)
+                nb_deposits += temp_deposits.count()
+                d_b = temp_deposits.aggregate(Sum('amount'))['amount__sum']
+                deposits_balance += d_b if temp_deposits.aggregate(Sum('amount'))['amount__sum'] is not None else 0
+
+                temp_withdrawals = Withdrawal.objects.filter(account=account)
+                nb_withdrawals += temp_withdrawals.count()
+                w_b = temp_withdrawals.aggregate(Sum('amount'))['amount__sum']
+                withdrawals_balance += w_b if w_b is not None else 0
+
+            context['total_balance'] = total_balance
+            context['transactions_balance'] = transactions_balance
+            context['deposits_balance'] = deposits_balance
+            context['withdrawals_balance'] = withdrawals_balance
+            context['nb_transactions'] = nb_transactions
+            context['nb_deposits'] = nb_deposits
+            context['nb_withdrawals'] = nb_withdrawals
 
         context['city_weather'] = city_weather
         return render(request, 'CRM/index.html', context)
@@ -296,6 +327,82 @@ class AddWithdrawal(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         user = request.user
         client = Client()
+        try:
+            client = Client.objects.get(person_id=user.person.id)
+        except Client.DoesNotExist as ex:
+            client = None
+        if client is not None:
+            context = dict()
+            form = WithdrawalForm(request.POST or None)
+            if form.is_valid():
+                password = form.cleaned_data.get('password')
+                if check_password(password, user.password):
+                    form.save()
+                    messages.success(request, "Retrait efféctué avec succée")
+                    return redirect('crm:withdrawals')
+                form.add_error('password', 'Mot de passe invalide')
+            context['withdrawal_form'] = form
+            return render(request, 'CRM/add-withdarawal.html', context)
+        return redirect('crm:home')
+
+# -------------------------- Clients(Only for employees) --------------------------
+class Clients(LoginRequiredMixin, View):
+    login_url = '/login/'
+    redirect_field_name = 'next'
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        employee = Employee()
+        try:
+            employee = Employee.objects.get(person_id=user.person.id)
+        except Client.DoesNotExist as ex:
+            employee = None
+        if employee is not None:
+            context = dict()
+            client_search_form = ClientSearchForm(request.GET or None)
+            if client_search_form.is_valid():
+                clients = Client.objects.filter(Q(pk=client_search_form.cleaned_data['search'])|Q(person__cin=client_search_form.cleaned_data['search']), creator=employee)
+            else:
+                clients = Client.objects.filter(creator=employee).order_by('-id')
+
+            for client in clients:
+                client.accounts_count = Account.objects.filter(client=client).count()
+            # ------------- Get requested page -------------
+            page = request.GET.get('page', 1)
+            paginator = Paginator(clients, 10)
+            try:
+                clients = paginator.page(page)
+            except PageNotAnInteger:
+                clients = paginator.page(1)
+            except EmptyPage:
+                clients = paginator.page(paginator.num_pages)
+
+            context['clients'] = clients
+            context['client_search_form'] = client_search_form
+            return render(request, 'CRM/clients.html', context)
+        return redirect('crm:home')
+
+# -------------------------- Add client(Only for employees) --------------------------
+class AddClient(LoginRequiredMixin, View):
+    login_url = '/login/'
+    redirect_field_name = 'next'
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        employee = Employee()
+        try:
+            employee = Employee.objects.get(person_id=user.person.id)
+        except Client.DoesNotExist as ex:
+            employee = None
+        if employee is not None:
+            context = dict()
+            context['client_form'] = ClientCustomForm()
+            return render(request, 'CRM/add-client.html', context)
+        return redirect('crm:home')
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        employee = Employee()
         try:
             client = Client.objects.get(person_id=user.person.id)
         except Client.DoesNotExist as ex:

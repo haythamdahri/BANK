@@ -44,6 +44,25 @@
                     <span class="menu-title">Versements</span>
                 </a>
             </li>
+        {% else %}
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'crm:clients' %}">
+                    <i class="menu-icon mdi mdi-clipboard-account"></i>
+                    <span class="menu-title">Mes Clients</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'crm:withdrawals' %}">
+                    <i class="menu-icon mdi mdi-minus-box-outline"></i>
+                    <span class="menu-title">Retraits</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'crm:deposits' %}">
+                    <i class="menu-icon mdi mdi-plus-outline"></i>
+                    <span class="menu-title">Versements</span>
+                </a>
+            </li>
         {% endif %}
 
     </ul>

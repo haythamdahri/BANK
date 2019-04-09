@@ -1,5 +1,7 @@
 from django import forms
-from CRM.models import Transaction, Account, Withdrawal, Deposit
+from django.contrib.auth.models import User
+
+from CRM.models import Transaction, Account, Withdrawal, Deposit, Client, Person
 import re
 
 
@@ -45,6 +47,9 @@ class TransactionForm(forms.ModelForm):
 class SearchForm(forms.Form):
     search = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control mr-sm-2', 'type': 'search', 'placeholder': 'Numero de transaction ...', 'aria-label': 'Search'}), required=True)
 
+class ClientSearchForm(forms.Form):
+    search = forms.CharField(widget=forms.NumberInput(attrs={'class': 'form-control mr-sm-2', 'type': 'search', 'placeholder': 'Numero du client Ou Cin...', 'aria-label': 'Search'}), required=True)
+
 
 class WithdrawalForm(forms.ModelForm):
     accounts_choices = [(account.id, account) for account in Account.objects.all()]
@@ -83,3 +88,30 @@ class DepositForm(forms.ModelForm):
         print(f"Account: {account}")
         if amount <= 100 or amount > 3000:
             self.add_error('amount', 'Montant invalide (100 < Montant < 3000)')
+
+class PersonForm(forms.ModelForm):
+    class Meta:
+        model = Person
+        fields = '__all__'
+
+class UserForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = '__all__'
+
+class ClientForm(forms.Form):
+    class Meta:
+        model = Client
+
+
+class ClientCustomForm(forms.Form):
+    user_first_name = forms.CharField(required=True, widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Nom"}))
+    user_last_name = forms.CharField(required=True, widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Prénom"}))
+    user_email = forms.EmailField(required=True, widget=forms.EmailInput(attrs={"class": "form-control", "placeholder": "Email"}))
+    user_password = forms.CharField(required=True, widget=forms.PasswordInput(attrs={"class": "form-control", "placeholder": "Mot de passe..."}))
+    person_cin = forms.CharField(required=True, widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Cin"}))
+    person_birth_date = forms.DateField(required=True, widget=forms.DateInput(attrs={"class": "form-control", "placeholder": "Date de naissance"}))
+    person_city = forms.CharField(required=True, widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Ville"}))
+    person_state = forms.CharField(required=True, widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Région"}))
+    person_nationality = forms.CharField(required=True, widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Nationalité"}))
+    person_image = forms.ImageField(required=True, widget=forms.FileInput(attrs={"class": "custom-file-input", "id": "imageFile"}))
