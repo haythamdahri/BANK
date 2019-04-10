@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="{% static 'CRM/vendors/css/vendor.bundle.base.css' %}"/>
     <link rel="stylesheet" href="{% static 'CRM/vendors/css/vendor.bundle.addons.css' %}"/>
     <link rel="stylesheet" href="{% static 'CRM/css/all.min.css' %}"/>
+    <link rel="stylesheet" href="{% static 'CRM/css/datepicker.min.css' %}"/>
     <!-- endinject -->
     <!-- plugin css for this page -->
     <!-- End plugin css for this page -->
@@ -38,11 +39,11 @@
             {% block content %}
                 <div class="main-panel">
 
-                {% if client is not None %}
-                    {% include 'CRM/parts/client-base-content.html' %}
-                {% else %}
-                    {% include 'CRM/parts/employee-base-content.html' %}
-                {% endif %}
+                    {% if client is not None %}
+                        {% include 'CRM/parts/client-base-content.html' %}
+                    {% else %}
+                        {% include 'CRM/parts/employee-base-content.html' %}
+                    {% endif %}
 
                     <!-- content-wrapper ends -->
                     <!-- partial:partials/_footer.html -->
@@ -65,23 +66,39 @@
 {% endblock %}
 <!-- container-scroller -->
 
-<!-- plugins:js -->
-<script src="{% static 'CRM/vendors/js/vendor.bundle.base.js' %}"></script>
-<script src="{% static 'CRM/vendors/js/vendor.bundle.addons.js' %}"></script>
-<!-- endinject -->
-<!-- Plugin js for this page-->
-<!-- End plugin js for this page-->
-<!-- inject:js -->
-<script src="{% static 'CRM/js/off-canvas.js' %}"></script>
-<script src="{% static 'CRM/js/misc.js' %}"></script>
-<!-- endinject -->
-<!-- Custom js for this page-->
-<script src="{% static 'CRM/js/dashboard.js' %}"></script>
-<!-- Fontawesome js for this page-->
-<script src="{% static 'CRM/js/all.min.js' %}"></script>
-<!-- Custom js for this page-->
-<script src="{% static 'CRM/js/custom.js' %}"></script>
-<!-- End custom js for this page-->
+{% block js %}
+    <!-- Jquery -->
+    <script src="{% static 'CRM/js/jquery.min.js' %}"></script>
+    <!-- plugins:js -->
+    <script src="{% static 'CRM/vendors/js/vendor.bundle.base.js' %}"></script>
+    <script src="{% static 'CRM/vendors/js/vendor.bundle.addons.js' %}"></script>
+    <!-- endinject -->
+    <!-- Plugin js for this page-->
+    <!-- End plugin js for this page-->
+    <!-- inject:js -->
+    <script src="{% static 'CRM/js/off-canvas.js' %}"></script>
+    <script src="{% static 'CRM/js/misc.js' %}"></script>
+    <!-- endinject -->
+    <!-- Custom js for this page-->
+    <script src="{% static 'CRM/js/dashboard.js' %}"></script>
+    <!-- Fontawesome js for this page-->
+    <script src="{% static 'CRM/js/all.min.js' %}"></script>
+
+    <!-- moment js for this page-->
+    <script src="{% static 'CRM/js/moment.min.js' %}"></script>
+    <!-- Bootstrap Datetime Picker js for this page-->
+
+    <script src="{% static 'CRM/js/datepicker.min.js' %}"></script>
+
+
+
+
+    <!-- Custom js for this page-->
+    <script src="{% static 'CRM/js/custom.js' %}"></script>
+    <!-- End custom js for this page-->
+{% endblock %}
+
+
 </body>
 
 </html>

@@ -1,5 +1,8 @@
 from django import forms
 from django.contrib.auth.models import User
+from django_countries.fields import CountryField
+from django_countries.templatetags.countries import get_countries
+from django_countries.widgets import CountrySelectWidget
 
 from CRM.models import Transaction, Account, Withdrawal, Deposit, Client, Person
 import re
@@ -92,26 +95,50 @@ class DepositForm(forms.ModelForm):
 class PersonForm(forms.ModelForm):
     class Meta:
         model = Person
-        fields = '__all__'
+        exclude = ['user']
 
 class UserForm(forms.ModelForm):
     class Meta:
         model = User
-        fields = '__all__'
+        fields = ['username', 'first_name', 'last_name', 'email']
+
 
 class ClientForm(forms.Form):
-    class Meta:
-        model = Client
+    username = forms.CharField(required=True, widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Nom d'utilisateur"}))
+    first_name = forms.CharField(required=True, widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Nom"}))
+    last_name = forms.CharField(required=True, widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Prénom"}))
+    email = forms.EmailField(required=True, widget=forms.EmailInput(attrs={"class": "form-control", "placeholder": "Email"}))
+    password = forms.CharField(required=True, widget=forms.PasswordInput(attrs={"class": "form-control", "placeholder": "Mot de passe..."}))
+    password_confirm = forms.CharField(required=True, widget=forms.PasswordInput(attrs={"class": "form-control", "placeholder": "Mot de passe..."}))
+    cin = forms.CharField(required=True, widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Cin"}))
+    birth_date = forms.DateField(required=True,input_formats=['%d/%m/%Y'], widget=forms.DateInput(attrs={"class": "form-control", "id": "birthdate_timepicker", "placeholder": "Date de naissance"}))
+    city = forms.CharField(required=True, widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Ville"}))
+    state = forms.CharField(required=True, widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Région"}))
+    nationality = forms.ChoiceField(required=True, widget=forms.Select(attrs={"class": "form-control", "placeholder": "Nationalité"}), choices=get_countries)
+    image = forms.ImageField(required=True, widget=forms.FileInput(attrs={"class": "custom-file-input", "id": "imageFile"}))
 
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        if User.objects.filter(email=email).exists():
+            self.add_error('email', 'L\'adresse Email est déja utilisée')
 
-class ClientCustomForm(forms.Form):
-    user_first_name = forms.CharField(required=True, widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Nom"}))
-    user_last_name = forms.CharField(required=True, widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Prénom"}))
-    user_email = forms.EmailField(required=True, widget=forms.EmailInput(attrs={"class": "form-control", "placeholder": "Email"}))
-    user_password = forms.CharField(required=True, widget=forms.PasswordInput(attrs={"class": "form-control", "placeholder": "Mot de passe..."}))
-    person_cin = forms.CharField(required=True, widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Cin"}))
-    person_birth_date = forms.DateField(required=True, widget=forms.DateInput(attrs={"class": "form-control", "placeholder": "Date de naissance"}))
-    person_city = forms.CharField(required=True, widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Ville"}))
-    person_state = forms.CharField(required=True, widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Région"}))
-    person_nationality = forms.CharField(required=True, widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Nationalité"}))
-    person_image = forms.ImageField(required=True, widget=forms.FileInput(attrs={"class": "custom-file-input", "id": "imageFile"}))
+    def clean_cin(self):
+        cin = self.cleaned_data['cin']
+        if Person.objects.filter(cin=cin).exists():
+            self.add_error('cin', 'Cin déja existe!')
+
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get('password')
+        nationaltity = cleaned_data.get('nationality')
+        password_confirm = cleaned_data.get('password_confirm')
+        username = cleaned_data.get('username')
+        codes = [code for code, country in get_countries()]
+        if len(password) < 8:
+            self.password('password', 'Mot de passe trés court!')
+        elif password != password_confirm:
+            self.add_error('password_confirm', 'Les deux mots de passe sont différents!')
+        elif nationaltity not in codes:
+            self.add_error('nationality', 'La nationalité selectionné n\'est pas valide!')
+        elif User.objects.filter(username=username).exists():
+            self.add_error('username', 'Nom d\'utilisateur déja utilisé!')

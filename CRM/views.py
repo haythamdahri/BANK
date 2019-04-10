@@ -13,7 +13,10 @@ from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.utils.timezone import now
 from django.views.generic.base import View
-from CRM.forms import LoginForm, TransactionForm, SearchForm, WithdrawalForm, ClientSearchForm, ClientCustomForm
+from django_countries.templatetags.countries import get_countries
+
+from CRM.forms import LoginForm, TransactionForm, SearchForm, WithdrawalForm, ClientSearchForm, ClientForm, \
+    UserForm, PersonForm, ClientForm
 from CRM.models import Transaction, Client, Employee, Account, Withdrawal, Deposit, generateTransactionId
 from datetime import datetime, timedelta
 
@@ -74,7 +77,7 @@ class Home(LoginRequiredMixin, View):
             context['deposits_amount'] = round(deposits_amount if deposits_amount is not None else 0, 2)
             context['deposits_count'] = deposits.count()
         else:
-            total_balance = nb_transactions = nb_deposits = nb_withdrawals = transactions_balance = deposits_balance = withdrawals_balance = 0
+            total_balance = nb_clients = nb_transactions = nb_deposits = nb_withdrawals = transactions_balance = deposits_balance = withdrawals_balance = 0
             employee = Employee.objects.filter(person_id=request.user.person.id)[0]
             for account in Account.objects.filter(client__in=Client.objects.filter(creator=employee)):
                 total_balance += account.balance
@@ -94,6 +97,7 @@ class Home(LoginRequiredMixin, View):
                 w_b = temp_withdrawals.aggregate(Sum('amount'))['amount__sum']
                 withdrawals_balance += w_b if w_b is not None else 0
 
+            context['nb_clients'] = Client.objects.filter(creator=employee).count()
             context['total_balance'] = total_balance
             context['transactions_balance'] = transactions_balance
             context['deposits_balance'] = deposits_balance
@@ -361,7 +365,11 @@ class Clients(LoginRequiredMixin, View):
             context = dict()
             client_search_form = ClientSearchForm(request.GET or None)
             if client_search_form.is_valid():
-                clients = Client.objects.filter(Q(pk=client_search_form.cleaned_data['search'])|Q(person__cin=client_search_form.cleaned_data['search']), creator=employee)
+                search = client_search_form.cleaned_data['search']
+                try:
+                    clients = Client.objects.filter(Q(pk=int(search))|Q(person__cin=client_search_form.cleaned_data['search']), creator=employee)
+                except ValueError:
+                    clients = Client.objects.filter(person__cin=client_search_form.cleaned_data['search'], creator=employee)
             else:
                 clients = Client.objects.filter(creator=employee).order_by('-id')
 
@@ -396,7 +404,7 @@ class AddClient(LoginRequiredMixin, View):
             employee = None
         if employee is not None:
             context = dict()
-            context['client_form'] = ClientCustomForm()
+            context['client_form'] = ClientForm()
             return render(request, 'CRM/add-client.html', context)
         return redirect('crm:home')
 
@@ -404,19 +412,25 @@ class AddClient(LoginRequiredMixin, View):
         user = request.user
         employee = Employee()
         try:
-            client = Client.objects.get(person_id=user.person.id)
+            employee = Employee.objects.get(person_id=user.person.id)
         except Client.DoesNotExist as ex:
-            client = None
-        if client is not None:
+            employee = None
+        if employee is not None:
             context = dict()
-            form = WithdrawalForm(request.POST or None)
-            if form.is_valid():
-                password = form.cleaned_data.get('password')
-                if check_password(password, user.password):
-                    form.save()
-                    messages.success(request, "Retrait efféctué avec succée")
-                    return redirect('crm:withdrawals')
-                form.add_error('password', 'Mot de passe invalide')
-            context['withdrawal_form'] = form
-            return render(request, 'CRM/add-withdarawal.html', context)
+            client_form = ClientForm(request.POST or None, request.FILES or None)
+            if client_form.is_valid():
+                user_form = UserForm(request.POST or None)
+                person_form = PersonForm(request.POST or None, request.FILES or None, initial={})
+                if user_form.is_valid() and person_form.is_valid():
+                    user = user_form.save()
+                    person = person_form.save(commit=False)
+                    person.user = user
+                    person.save()
+                    Client.objects.create(person=person, creator=employee)
+                    messages.success(request, "Compte client à été crée avec succé")
+                    return redirect('crm:clients')
+                else:
+                    return HttpResponse(f"{user_form.errors}\n{person_form.errors}")
+            context['client_form'] = client_form
+            return render(request, 'CRM/add-client.html', context)
         return redirect('crm:home')

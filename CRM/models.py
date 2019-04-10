@@ -6,6 +6,7 @@ import uuid
 
 # Create your models here.
 from django.utils.timezone import now
+from django_countries.fields import CountryField
 
 transactions_types = [('transfer', 'Transfer'), ('withdrawal', 'Withdrawal'), ('payment', 'Payment')]
 
@@ -24,7 +25,7 @@ class Person(models.Model):
     birth_date = models.DateField(null=False, blank=False)
     city = models.CharField(blank=False, null=False, max_length=30)
     state = models.CharField(blank=False, null=False, max_length=100)
-    nationality = models.CharField(blank=False, null=False, max_length=150)
+    nationality = CountryField(blank=False, null=False, max_length=150)
     image = models.ImageField(upload_to='images/')
 
     def __str__(self):

@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'PIL',
-    'widget_tweaks'
+    'widget_tweaks',
+    'django_countries'
 ]
 
 MIDDLEWARE = [
