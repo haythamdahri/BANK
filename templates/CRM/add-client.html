@@ -171,7 +171,7 @@
                                         {# city #}
                                         <div class="form-group">
                                             <label>Ville</label>
-                                            {% if client_form.birth_date.errors %}
+                                            {% if client_form.city.errors %}
                                                 {% render_field client_form.city class='form-control is-invalid' %}
                                             {% else %}
                                                 {% render_field client_form.city %}

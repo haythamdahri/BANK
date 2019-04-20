@@ -13,11 +13,14 @@ urlpatterns = [
     path('logout/', views.Logout.as_view(), name="logout"),
     #------------------- Customer Features -------------------
     path('transactions/', views.Transactions.as_view(), name="transactions"),
-    path('transactions/add', views.AddTransaction.as_view(), name="add_transaction"),
+    path('transactions/add/', views.AddTransaction.as_view(), name="add_transaction"),
     path('withdrawals/', views.Withdrawals.as_view(), name="withdrawals"),
-    path('withdrawals/add', views.AddWithdrawal.as_view(), name="add_withdrawal"),
+    path('withdrawals/add/', views.AddWithdrawal.as_view(), name="add_withdrawal"),
     path('deposits/', views.Deposits.as_view(), name="deposits"),
-#------------------- Employee Features -------------------
+    #------------------- Employee Features -------------------
     path('clients/', views.Clients.as_view(), name="clients"),
     path('clients/add', views.AddClient.as_view(), name="add_client"),
+    #------------------- Account Features -------------------
+    path('reset-password/', views.ResetPassword.as_view(), name="reset_password"),
+    path('account-settings/', views.AccountSettings.as_view(), name="account_settings"),
 ]

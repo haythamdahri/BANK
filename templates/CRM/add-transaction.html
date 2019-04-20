@@ -18,6 +18,12 @@
                                         <i class="far fa-money-bill-alt"></i> Transfert d'argent
                                     </p>
 
+                                    <div class="row mt-4">
+                                        <div class="col-md-12">
+                                            {% include 'CRM/messages.html' %}
+                                        </div>
+                                    </div>
+
                                     <form method="POST" action="{% url 'crm:add_transaction' %}">
 
                                         {% csrf_token %}

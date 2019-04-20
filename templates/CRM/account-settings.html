@@ -1,0 +1,217 @@
+{% extends 'CRM/base.html' %}
+{% load widget_tweaks %}
+
+
+{% block title %}Paramétres Profil{% endblock %}
+
+{% block content %}
+    <div class="main-panel">
+        <div class="content-wrapper">
+            <div class="row">
+                <div class="col-lg-12 d-flex align-items-stretch">
+
+                    <div class="row flex-grow">
+                        <div class="col-12 grid-margin stretch-card">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h4 class="card-title">Paramétres Profil</h4>
+                                    <p class="card-description font-weight-bold display-4">
+                                        <i class="fas fa-cog"></i> changer vos informations
+                                    </p>
+
+                                    <div class="row mt-4">
+                                        <div class="col-md-12">
+                                            {% include 'CRM/messages.html' %}
+                                        </div>
+                                    </div>
+
+                                    <form method="POST" action="{% url 'crm:account_settings' %}"
+                                          enctype="multipart/form-data">
+
+                                        {% csrf_token %}
+
+                                        {# image #}
+                                        <div class="custom-file mb-3">
+                                            {% if account_form.image.errors %}
+                                                {% render_field account_form.image lang='fr' class='custom-file-input is-invalid' %}
+                                                <label class="custom-file-label" for="imageFile">Choisir Image</label>
+                                            {% else %}
+                                                {% render_field account_form.image lang='fr' %}
+                                                <label class="custom-file-label" for="imageFile">Choisir Image</label>
+                                            {% endif %}
+                                            {% for error in account_form.image.errors %}
+                                                <small class="form-text text-danger font-weight-bold">
+                                                    <i class="fas fa-exclamation-triangle"></i> {{ error }}<br>
+                                                </small>
+                                            {% endfor %}
+                                        </div>
+
+                                        {# image preview #}
+                                        <div class="row mt-2">
+                                            <div class="col-12 text-center">
+                                                <img src="..." class="img-fluid rounded img-thumbnail"
+                                                     style="display: none;max-height: 350px"
+                                                     id="clientImage" alt="Image client">
+                                            </div>
+                                        </div>
+
+                                        {# username #}
+                                        <div class="form-group">
+                                            <label>Nom d'utilisateur</label>
+                                            {% if account_form.username.errors %}
+                                                {% render_field account_form.username class='form-control is-invalid' %}
+                                            {% else %}
+                                                {% render_field account_form.username %}
+                                            {% endif %}
+                                            {% for error in account_form.username.errors %}
+                                                <small class="form-text text-danger font-weight-bold">
+                                                    <i class="fas fa-exclamation-triangle"></i> {{ error }}<br>
+                                                </small>
+                                            {% endfor %}
+                                        </div>
+
+                                        {# first_name #}
+                                        <div class="form-group">
+                                            <label>Nom</label>
+                                            {% if account_form.first_name.errors %}
+                                                {% render_field account_form.first_name class='form-control is-invalid' %}
+                                            {% else %}
+                                                {% render_field account_form.first_name %}
+                                            {% endif %}
+                                            {% for error in account_form.first_name.errors %}
+                                                <small class="form-text text-danger font-weight-bold">
+                                                    <i class="fas fa-exclamation-triangle"></i> {{ error }}<br>
+                                                </small>
+                                            {% endfor %}
+                                        </div>
+
+                                        {# last_name #}
+                                        <div class="form-group">
+                                            <label>Prénom</label>
+                                            {% if account_form.last_name.errors %}
+                                                {% render_field account_form.last_name class='form-control is-invalid' %}
+                                            {% else %}
+                                                {% render_field account_form.last_name %}
+                                            {% endif %}
+                                            {% for error in account_form.last_name.errors %}
+                                                <small class="form-text text-danger font-weight-bold">
+                                                    <i class="fas fa-exclamation-triangle"></i> {{ error }}<br>
+                                                </small>
+                                            {% endfor %}
+                                        </div>
+
+                                        {# email #}
+                                        <div class="form-group">
+                                            <label>Email</label>
+                                            {% if account_form.email.errors %}
+                                                {% render_field account_form.email class='form-control is-invalid' %}
+                                            {% else %}
+                                                {% render_field account_form.email %}
+                                            {% endif %}
+                                            {% for error in account_form.email.errors %}
+                                                <small class="form-text text-danger font-weight-bold">
+                                                    <i class="fas fa-exclamation-triangle"></i> {{ error }}<br>
+                                                </small>
+                                            {% endfor %}
+                                        </div>
+
+                                        {# cin #}
+                                        <div class="form-group">
+                                            <label>Cin</label>
+                                            {% if account_form.cin.errors %}
+                                                {% render_field account_form.cin class='form-control is-invalid' %}
+                                            {% else %}
+                                                {% render_field account_form.cin %}
+                                            {% endif %}
+                                            {% for error in account_form.cin.errors %}
+                                                <small class="form-text text-danger font-weight-bold">
+                                                    <i class="fas fa-exclamation-triangle"></i> {{ error }}<br>
+                                                </small>
+                                            {% endfor %}
+                                        </div>
+
+                                        {# birth_date #}
+                                        <div class="form-group">
+                                            {% if account_form.birth_date.errors %}
+                                                {% render_field account_form.birth_date class='form-control is-invalid' %}
+                                            {% else %}
+                                                {% render_field account_form.birth_date %}
+                                            {% endif %}
+                                            {% for error in account_form.birth_date.errors %}
+                                                <small class="form-text text-danger font-weight-bold">
+                                                    <i class="fas fa-exclamation-triangle"></i> {{ error }}<br>
+                                                </small>
+                                            {% endfor %}
+                                        </div>
+
+                                        {# city #}
+                                        <div class="form-group">
+                                            <label>Ville</label>
+                                            {% if account_form.city.errors %}
+                                                {% render_field account_form.city class='form-control is-invalid' %}
+                                            {% else %}
+                                                {% render_field account_form.city %}
+                                            {% endif %}
+                                            {% for error in account_form.city.errors %}
+                                                <small class="form-text text-danger font-weight-bold">
+                                                    <i class="fas fa-exclamation-triangle"></i> {{ error }}<br>
+                                                </small>
+                                            {% endfor %}
+                                        </div>
+
+                                        {# state #}
+                                        <div class="form-group">
+                                            <label>Région</label>
+                                            {% if account_form.state.errors %}
+                                                {% render_field account_form.state class='form-control is-invalid' %}
+                                            {% else %}
+                                                {% render_field account_form.state %}
+                                            {% endif %}
+                                            {% for error in account_form.state.errors %}
+                                                <small class="form-text text-danger font-weight-bold">
+                                                    <i class="fas fa-exclamation-triangle"></i> {{ error }}<br>
+                                                </small>
+                                            {% endfor %}
+                                        </div>
+
+                                        {# nationality #}
+                                        <div class="form-group">
+                                            <label>Nationalité</label>
+                                            {% if account_form.nationality.errors %}
+                                                {% render_field account_form.nationality class='form-control form-control-sm is-invalid' %}
+                                            {% else %}
+                                                {% render_field account_form.nationality %}
+                                            {% endif %}
+                                            {% for error in  account_form.nationality.errors %}
+                                                <small class="form-text text-danger font-weight-bold">
+                                                    <i class="fas fa-exclamation-triangle"></i> {{ error }}<br>
+                                                </small>
+                                            {% endfor %}
+                                        </div>
+
+                                        <button type="submit" class="btn btn-success mr-2">
+                                            <span class="mdi mdi-account-check"></span> Effectuer
+                                        </button>
+                                    </form>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+    {{ block.super }}
+    <script>
+        $(document).ready(function () {
+            $(function () {
+                $("#birthdate_timepicker").datepicker();
+            });
+        });
+    </script>
+{% endblock %}

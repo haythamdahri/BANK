@@ -88,10 +88,10 @@
                         <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
                             {% if deposits.has_previous %}
                                 <div class="btn-group" role="group" aria-label="First group">
-                                    <a href="{% url 'crm:withdrawals' %}?page=1">
+                                    <a href="{% url 'crm:deposits' %}?page=1">
                                         <button type="button" class="btn btn-light"><<</button>
                                     </a>
-                                    <a href="{% url 'crm:withdrawals' %}?page={{ deposits.previous_page_number }}">
+                                    <a href="{% url 'crm:deposits' %}?page={{ deposits.previous_page_number }}">
                                         <button type="button" class="btn btn-light"><</button>
                                     </a>
                                 </div>
@@ -101,7 +101,7 @@
                                     {% if deposits.number == page_num %}
                                         <button type="button" class="btn btn-primary active">{{ page_num }}</button>
                                     {% else %}
-                                        <a href="{% url 'crm:withdrawals' %}?page={{ page_num }}">
+                                        <a href="{% url 'crm:deposits' %}?page={{ page_num }}">
                                             <button type="button" class="btn btn-light">{{ page_num }}</button>
                                         </a>
                                     {% endif %}
@@ -109,10 +109,10 @@
                             </div>
                             {% if deposits.has_next %}
                                 <div class="btn-group" role="group" aria-label="Third group">
-                                    <a href="{% url 'crm:withdrawals' %}?page={{ deposits.next_page_number }}">
+                                    <a href="{% url 'crm:deposits' %}?page={{ deposits.next_page_number }}">
                                         <button type="button" class="btn btn-light">></button>
                                     </a>
-                                    <a href="{% url 'crm:withdrawals' %}?page={{ deposits.paginator.num_pages }}">
+                                    <a href="{% url 'crm:deposits' %}?page={{ deposits.paginator.num_pages }}">
                                         <button type="button" class="btn btn-light">>></button>
                                     </a>
                                 </div>
