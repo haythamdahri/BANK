@@ -479,7 +479,7 @@ class AddClient(LoginRequiredMixin, View):
             client_form = ClientForm(request.POST or None, request.FILES or None)
             if client_form.is_valid():
                 user_form = UserForm(request.POST or None)
-                person_form = PersonForm(request.POST or None, request.FILES or None, initial={})
+                person_form = PersonForm(request.POST or None, request.FILES or None)
                 if user_form.is_valid() and person_form.is_valid():
                     user = user_form.save()
                     person = person_form.save(commit=False)
@@ -488,6 +488,8 @@ class AddClient(LoginRequiredMixin, View):
                     Client.objects.create(person=person, creator=employee)
                     messages.success(request, "Compte client à été crée avec succé")
                     return redirect('crm:clients')
+                else:
+                    messages.error(request, "Données incorrectes, veuillez ressayer!")
             context['client_form'] = client_form
             return render(request, 'CRM/add-client.html', context)
         return redirect('crm:home')

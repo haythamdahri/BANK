@@ -19,6 +19,9 @@
                                         <i class="far fa-money-bill-alt"></i> Creation compte client
                                     </p>
 
+                                    <!-- @Messages section -->
+                                    {% include 'CRM/messages.html' %}
+
                                     <form method="POST" action="{% url 'crm:add_client' %}"
                                           enctype="multipart/form-data">
 
@@ -234,7 +237,9 @@
     <script>
         $(document).ready(function () {
             $(function () {
-                $("#birthdate_timepicker").datepicker();
+                $("#birthdate_timepicker").datepicker({
+                    format: 'yyyy-mm-dd',
+                });
             });
         });
     </script>
