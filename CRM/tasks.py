@@ -1,7 +1,7 @@
 from CRM.models import Withdrawal, Deposit
 
 
-def generate_withrawals(number):
+def generate_withdrawals(number):
     import random
     for i in range(number):
         Withdrawal.objects.create(account_id=1, amount=random.randrange(100, 600))

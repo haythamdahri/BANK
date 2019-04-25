@@ -1,4 +1,5 @@
 from datetime import timedelta
+import datetime
 
 from django.contrib.auth.models import User
 from django.db import models
@@ -56,8 +57,16 @@ class Account(models.Model):
     balance = models.DecimalField(decimal_places=2, max_digits=10, null=False, blank=False, default=0)
     credit_card = models.CharField(max_length=16, unique=True, blank=False, null=False, default=generateCreditCardNumber, auto_created=True)
     expiration_date = models.DateField(default=(now()+timedelta(days=(365*4))))
-    data_opened = models.DateField(default=now)
+    opening_date = models.DateField(default=now)
     opening_balance = models.DecimalField(decimal_places=2, max_digits=10, null=False, blank=False, default=0)
+
+    @property
+    def is_expired(self):
+        return self.expiration_date < datetime.date.today()
+
+    @property
+    def is_actif(self):
+        return self.balance > 0
 
     def __str__(self):
         return self.client.__str__() + " | Balance: " + self.balance.__str__()
@@ -71,6 +80,7 @@ class Transaction(models.Model):
 
     def __str__(self):
         return self.sender_account.__str__() + " | " + self.receiver_account.__str__() + " | Amount: " + self.amount.__str__()
+
 
 #------------------- Retrait -------------------
 class Withdrawal(models.Model):

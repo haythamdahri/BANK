@@ -17,12 +17,12 @@ from django.views.generic.base import View
 from django_countries.templatetags.countries import get_countries
 
 from CRM.forms import LoginForm, TransactionForm, SearchForm, WithdrawalForm, ClientSearchForm, ClientForm, \
-    UserForm, PersonForm, ClientForm, ResetPasswordForm, AccountSettingsForm
+    UserForm, PersonForm, ClientForm, ResetPasswordForm, AccountSettingsForm, AccountSearchForm
 from CRM.models import Transaction, Client, Employee, Account, Withdrawal, Deposit, generateTransactionId, Person
 from datetime import datetime, timedelta
 
 # -------------------------- Acceuil --------------------------
-from CRM.tasks import generate_withrawals, generate_deposits
+from CRM.tasks import generate_withdrawals, generate_deposits
 
 
 def getWeatherData(city):
@@ -34,6 +34,29 @@ def getWeatherData(city):
         response = requests.get(url.format(default_city, api_key)).json()
     return response
 
+def getUserStatistics(request):
+    try:
+        user = request.user
+        person = Person.objects.get(user=user)
+        client = Client.objects.get(person=person)
+        #---------------- Transactions -------------------
+        user_transactions_count = Transaction.objects.filter(sender_account__client=client).count()
+        all_transactions_count =  Transaction.objects.all().count()
+        transactions_statistics = ((100 * user_transactions_count) / all_transactions_count)
+        #---------------- Withdrawals -------------------
+        user_withdrawals_count = Withdrawal.objects.filter(account__client=client).count()
+        all_withdrawals_count =  Withdrawal.objects.all().count()
+        withdrawals_statistics =  ((100 * user_withdrawals_count) / all_withdrawals_count)
+        #---------------- Transactions -------------------
+        user_deposits_count = Deposit.objects.filter(account__client=client).count()
+        all_deposits_count = Deposit.objects.all().count()
+        deposits_statistics = ((100 * user_deposits_count) / all_deposits_count)
+        #---------------- Received Transactions Count -------------------
+        received_transaction_count = Transaction.objects.filter(receiver_account__client=client).count()
+
+        return (transactions_statistics, withdrawals_statistics, deposits_statistics, received_transaction_count)
+    except:
+        return (0, 0, 0)
 
 class Home(LoginRequiredMixin, View):
     login_url = '/login/'
@@ -69,19 +92,28 @@ class Home(LoginRequiredMixin, View):
         if client is not None:
             transactions = Transaction.objects.filter(
                 sender_account__in=Account.objects.filter(client_id=client.id))
-            transactions_amount = transactions.aggregate(Avg('amount'))['amount__avg']
+            transactions_amount = transactions.aggregate(Sum('amount'))['amount__sum']
             context['transactions_amount'] = round(transactions_amount if transactions_amount is not None else 0, 2)
             context['transactions_count'] = transactions.count()
 
             withdrawals = Withdrawal.objects.filter(
                 account__in=Account.objects.filter(client_id=client.id))
-            withdrawals_amount = withdrawals.aggregate(Avg('amount'))['amount__avg']
+            withdrawals_amount = withdrawals.aggregate(Sum('amount'))['amount__sum']
+
+            #----------- statistiques -------------
+            statistics = getUserStatistics(request)
+
+            context["transactions_statistics"] = statistics[0]
+            context["withdrawals_statistics"] = statistics[1]
+            context["deposits_statistics"] = statistics[2]
+            context["received_transaction_count"] = statistics[3]
+            context["today_year"] = datetime.year
+
             context['withdrawals_amount'] = round(withdrawals_amount if withdrawals_amount is not None else 0, 2)
             context['withdrawals_count'] = withdrawals.count()
-
             deposits = Deposit.objects.filter(
                 account__in=Account.objects.filter(client_id=client.id))
-            deposits_amount = withdrawals.aggregate(Avg('amount'))['amount__avg']
+            deposits_amount = deposits.aggregate(Sum('amount'))['amount__sum']
             context['deposits_amount'] = round(deposits_amount if deposits_amount is not None else 0, 2)
             context['deposits_count'] = deposits.count()
         else:
@@ -207,7 +239,6 @@ class Withdrawals(LoginRequiredMixin, View):
 
     def get(self, request, *args, **kwargs):
         user = request.user
-        # generate_withrawals(120)
         client = Client()
         try:
             client = Client.objects.get(person_id=user.person.id)
@@ -471,8 +502,8 @@ class ResetPassword(LoginRequiredMixin, View):
         user = request.user
         context = dict()
         form = ResetPasswordForm()
-        context['reset_password_form'] = form
-        return render(request, 'CRM/reset-password.html', context)
+        context['password_reset_form'] = form
+        return render(request, 'CRM/password-reset.html', context)
 
     def post(self, request, *args, **kwargs):
         user = request.user
@@ -489,10 +520,10 @@ class ResetPassword(LoginRequiredMixin, View):
                     messages.info(request, "Veuillez se connecter avec votre nouveau mot de passe!")
                 except:
                     pass
-                return redirect('crm:reset_password')
+                return redirect('crm:password_reset')
             form.add_error('old_password', 'Ancien mot de passe invalide')
-        context['reset_password_form'] = form
-        return render(request, 'CRM/reset-password.html', context)
+        context['password_reset_form'] = form
+        return render(request, 'CRM/password-reset.html', context)
 
 
 # -------------------------- Account Settings --------------------------
@@ -512,7 +543,7 @@ class AccountSettings(LoginRequiredMixin, View):
                 'last_name': user.last_name,
                 'email': user.email,
                 'cin': person.cin,
-                'birth_date': person.birth_date,
+                'birth_date': person.birth_date.strftime("%m/%d/%Y"),
                 'city': person.city,
                 'state': person.state,
                 'nationality': person.nationality,
@@ -564,3 +595,54 @@ class AccountSettings(LoginRequiredMixin, View):
         except Exception as ex:
             print(ex)
             return redirect('crm:account_settings')
+
+# -------------------------- Page not found 404 --------------------------
+class NotFound(LoginRequiredMixin, View):
+    login_url = '/login/'
+    redirect_field_name = 'next'
+
+    def get(self, request, *args, **kwargs):
+        return render(request, "crm/error-404.html")
+
+    def post(self, request, *args, **kwargs):
+        return render(request, "CRM/error-404.html")
+
+
+# -------------------------- Page not found 404 --------------------------
+class Accounts(LoginRequiredMixin, View):
+    login_url = '/login/'
+    redirect_field_name = 'next'
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        client = Client()
+        try:
+            client = Client.objects.get(person_id=user.person.id)
+        except Client.DoesNotExist as ex:
+            client = None
+        if client is not None:
+            context = dict()
+            search_form = AccountSearchForm(request.GET)
+            if search_form.is_valid():
+                accounts = Account.objects.filter(Q(id=search_form.cleaned_data.get('search')) | Q(credit_card=search_form.cleaned_data.get('search')), client=client)
+            else:
+                accounts = Account.objects.filter(client=client)
+
+            # ------------- Get requested page -------------
+            page = request.GET.get('page', 1)
+            paginator = Paginator(accounts, 5)
+            try:
+                accounts = paginator.page(page)
+            except PageNotAnInteger:
+                accounts = paginator.page(1)
+            except EmptyPage:
+                accounts = paginator.page(paginator.num_pages)
+
+            context['search_form'] = search_form
+            context["accounts"] = accounts
+            context["now"] = datetime.today()
+            return render(request, "CRM/accounts.html", context)
+        return redirect('crm:home')
+
+
+

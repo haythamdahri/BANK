@@ -1,0 +1,127 @@
+{% extends 'CRM/base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Mes comptes{% endblock %}
+
+{% block content %}
+    <div class="main-panel">
+        <div class="content-wrapper">
+            <div class="row">
+                <div class="col-lg-12 grid-margin stretch-card">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-6 col-md-6 col-lg-6 col-xl-6 col-sm-12">
+                                    <h4 class="card-title"><i class="fas fa-users"></i> Liste des comptes utilisateur</h4>
+                                </div>
+
+                                <div class="col-6 col-md-6 col-lg-6 col-xl-6 col-sm-12">
+                                    <form class="form-inline my-2 my-lg-0" method="GET"
+                                          action="{% url 'crm:accounts' %}">
+                                        {% render_field search_form.search %}
+                                        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">
+                                            <span class="mdi mdi-search-web"></span>Rechercher
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <div class="row mt-4">
+                                <div class="col-md-12">
+                                    {% include 'CRM/messages.html' %}
+                                </div>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                    <tr>
+                                        <th>N° compte</th>
+                                        <th>Montant</th>
+                                        <th>N° de la carte</th>
+                                        <th>Date d'ouverture</th>
+                                        <th>Montant d'ouverture</th>
+                                        <th>Expiration</th>
+                                        <th>Status</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for account in accounts.object_list %}
+                                        <tr>
+                                            <td>{{ account.id }}</td>
+                                            <td>{{ account.balance }} Dhs</td>
+                                            <td>{{ account.credit_card }}</td>
+                                            <td>{{ account.opening_date }}</td>
+                                            <td>{{ account.opening_balance }} Dhs</td>
+                                            <td>
+                                                {% if account.is_expired %}<label class="badge badge-danger"><i
+                                                        class="fas fa-minus-circle"></i> Expiré</label>
+                                                {% else %}
+                                                    <label class="badge badge-success"><i
+                                                            class="fas fa-check-circle"></i> En cours</label>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if account.is_actif %}
+                                                    <label class="badge badge-success"><i
+                                                            class="fas fa-check-circle"></i> Actif</label>
+                                                {% else %}
+                                                    <label class="badge badge-danger"><i
+                                                            class="fas fa-minus-circle"></i> Passif</label>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% empty %}
+                                        <tr class="alert alert-info">
+                                            <i class="fas fa-exclamation"></i> Aucun compte n'a été trouvé!
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% if accounts.has_other_pages %}
+                <div class="row">
+                    <div class="col-12 text-center">
+                        <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                            {% if accounts.has_previous %}
+                                <div class="btn-group" role="group" aria-label="First group">
+                                    <a href="{% url 'crm:accounts' %}?page=1">
+                                        <button type="button" class="btn btn-light"><<</button>
+                                    </a>
+                                    <a href="{% url 'crm:accounts' %}?page={{ accounts.previous_page_number }}">
+                                        <button type="button" class="btn btn-light"><</button>
+                                    </a>
+                                </div>
+                            {% endif %}
+                            <div class="btn-group" role="group" aria-label="Second group">
+                                {% for page_num in accounts.paginator.page_range %}
+                                    {% if accounts.number == page_num %}
+                                        <button type="button" class="btn btn-primary active">{{ page_num }}</button>
+                                    {% else %}
+                                        <a href="{% url 'crm:accounts' %}?page={{ page_num }}">
+                                            <button type="button" class="btn btn-light">{{ page_num }}</button>
+                                        </a>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            {% if accounts.has_next %}
+                                <div class="btn-group" role="group" aria-label="Third group">
+                                    <a href="{% url 'crm:accounts' %}?page={{ accounts.next_page_number }}">
+                                        <button type="button" class="btn btn-light">></button>
+                                    </a>
+                                    <a href="{% url 'crm:accounts' %}?page={{ accounts.paginator.num_pages }}">
+                                        <button type="button" class="btn btn-light">>></button>
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

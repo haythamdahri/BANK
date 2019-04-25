@@ -43,7 +43,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='account',
-            name='data_opened',
+            name='opening_date',
             field=models.DateField(default=django.utils.timezone.now),
         ),
         migrations.AddField(

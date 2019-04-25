@@ -60,6 +60,11 @@ class SearchForm(forms.Form):
         attrs={'class': 'form-control mr-sm-2', 'type': 'search', 'placeholder': 'Numero de transaction ...',
                'aria-label': 'Search'}), required=True)
 
+class AccountSearchForm(forms.Form):
+    search = forms.CharField(widget=forms.TextInput(
+        attrs={'class': 'form-control mr-sm-2', 'type': 'search', 'placeholder': 'Numero du compte ou de la carte...',
+               'aria-label': 'Search'}), required=True)
+
 
 class ClientSearchForm(forms.Form):
     search = forms.CharField(widget=forms.NumberInput(
@@ -210,7 +215,7 @@ class AccountSettingsForm(forms.Form):
     email = forms.EmailField(required=True,
                              widget=forms.EmailInput(attrs={"class": "form-control", "placeholder": "Email"}))
     cin = forms.CharField(required=True, widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Cin"}))
-    birth_date = forms.DateField(required=True, input_formats=['%d/%m/%Y'], widget=forms.DateInput(
+    birth_date = forms.DateField(required=True, input_formats=['%m/%d/%Y'], widget=forms.DateInput(
         attrs={"class": "form-control", "id": "birthdate_timepicker", "placeholder": "Date de naissance"}))
     city = forms.CharField(required=True,
                            widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Ville"}))
@@ -223,11 +228,14 @@ class AccountSettingsForm(forms.Form):
                              widget=forms.FileInput(attrs={"class": "custom-file-input", "id": "imageFile"}))
 
     def clean(self):
-        cleaned_data = super().clean()
-        nationality = cleaned_data.get('nationality')
-        birth_date = cleaned_data.get('birth_date')
-        codes = [code for code, country in get_countries()]
-        if nationality not in codes:
-            self.add_error('nationality', 'La nationalité selectionné n\'est pas valide!')
-        if birth_date > datetime.now().date():
-            self.add_error('birth_date', 'Date de naissance invalide, choisir une date valide!')
+        try:
+            cleaned_data = super().clean()
+            nationality = cleaned_data.get('nationality')
+            birth_date = cleaned_data.get('birth_date')
+            codes = [code for code, country in get_countries()]
+            if nationality not in codes:
+                self.add_error('nationality', 'La nationalité selectionné n\'est pas valide!')
+            if birth_date > datetime.now().date():
+                self.add_error('birth_date', 'Date de naissance invalide, choisir une date valide!')
+        except Exception as ex:
+            print(ex)
