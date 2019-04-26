@@ -13,7 +13,7 @@
                         <div class="col-12 grid-margin stretch-card">
                             <div class="card">
                                 <div class="card-body">
-                                    <h4 class="card-title">Retrait</h4>
+                                    <h4 class="card-title"><span class="mdi mdi-minus-box"></span>  Retrait</h4>
                                     <p class="card-description font-weight-bold display-4">
                                         <i class="far fa-money-bill-alt"></i> Retirer de l'argent
                                     </p>
@@ -23,7 +23,7 @@
                                         {% csrf_token %}
 
                                         <div class="form-group">
-                                            <label>Compte Emetteur</label>
+                                            <label>Compte</label>
                                             <select name="account"
                                                     class="form-control {% if withdrawal_form.account.errors %}is-invalid{% endif %}"
                                                     required

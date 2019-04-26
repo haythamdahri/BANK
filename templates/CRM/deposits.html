@@ -3,27 +3,38 @@
 
 {% block title %}Virements{% endblock %}
 
+
 {% block content %}
     <div class="main-panel">
         <div class="content-wrapper">
             <div class="row">
                 <div class="col-lg-12 grid-margin stretch-card">
                     <div class="card">
-                        <div class="card-body row">
-                            <div class="col-6 col-md-6 col-lg-6 col-xl-6 col-sm-12">
-                                <h4 class="card-title">Liste des Virements</h4>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-6 col-md-6 col-lg-6 col-xl-6 col-sm-12">
+                                    <h4 class="card-title"><span class="mdi mdi-format-list-numbers"></span> Liste des
+                                        Virements</h4>
+                                </div>
+
+                                <div class="col-6 col-md-6 col-lg-6 col-xl-6 col-sm-12">
+                                    <form class="form-inline my-2 my-lg-0" method="GET"
+                                          action="{% url 'crm:deposits' %}">
+                                        {% render_field search_form.search %}
+                                        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">
+                                            <span class="mdi mdi-search-web"></span>Rechercher
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
 
-                            <div class="col-6 col-md-6 col-lg-6 col-xl-6 col-sm-12">
-                                <form class="form-inline my-2 my-lg-0" method="GET"
-                                      action="{% url 'crm:deposits' %}">
-                                    {% render_field search_form.search %}
-                                    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">
-                                        <span class="mdi mdi-search-web"></span>Rechercher
+                            {% if client is None %}
+                                <a href="{% url 'crm:add_deposit' %}">
+                                    <button type="button" class="btn btn-success btn-fw">
+                                        <span class="mdi mdi-plus-outline"></span> Ajouter un virement
                                     </button>
-                                </form>
-                            </div>
-
+                                </a>
+                            {% endif %}
 
                             <div class="row mt-4">
                                 <div class="col-md-12">
@@ -88,10 +99,14 @@
                         <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
                             {% if deposits.has_previous %}
                                 <div class="btn-group" role="group" aria-label="First group">
-                                    <a href="{% url 'crm:deposits' %}?page=1">
+                                    <a href="{% url 'crm:deposits' %}?page=1{% if 'search' in request.GET %}&search={{ request.GET.search }}{% endif %}">
                                         <button type="button" class="btn btn-light"><<</button>
                                     </a>
-                                    <a href="{% url 'crm:deposits' %}?page={{ deposits.previous_page_number }}">
+                                    <a href="{% url 'crm:deposits' %}?page=
+
+
+
+                                            {{ deposits.previous_page_number }}{% if 'search' in request.GET %}&search={{ request.GET.search }}{% endif %}">
                                         <button type="button" class="btn btn-light"><</button>
                                     </a>
                                 </div>
@@ -101,7 +116,11 @@
                                     {% if deposits.number == page_num %}
                                         <button type="button" class="btn btn-primary active">{{ page_num }}</button>
                                     {% else %}
-                                        <a href="{% url 'crm:deposits' %}?page={{ page_num }}">
+                                        <a href="{% url 'crm:deposits' %}?page=
+
+
+
+                                                {{ page_num }}{% if 'search' in request.GET %}&search={{ request.GET.search }}{% endif %}">
                                             <button type="button" class="btn btn-light">{{ page_num }}</button>
                                         </a>
                                     {% endif %}
@@ -109,10 +128,18 @@
                             </div>
                             {% if deposits.has_next %}
                                 <div class="btn-group" role="group" aria-label="Third group">
-                                    <a href="{% url 'crm:deposits' %}?page={{ deposits.next_page_number }}">
+                                    <a href="{% url 'crm:deposits' %}?page=
+
+
+
+                                            {{ deposits.next_page_number }}{% if 'search' in request.GET %}&search={{ request.GET.search }}{% endif %}">
                                         <button type="button" class="btn btn-light">></button>
                                     </a>
-                                    <a href="{% url 'crm:deposits' %}?page={{ deposits.paginator.num_pages }}">
+                                    <a href="{% url 'crm:deposits' %}?page=
+
+
+
+                                            {{ deposits.paginator.num_pages }}{% if 'search' in request.GET %}&search={{ request.GET.search }}{% endif %}">
                                         <button type="button" class="btn btn-light">>></button>
                                     </a>
                                 </div>

@@ -41,7 +41,7 @@
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'crm:deposits' %}">
                     <i class="menu-icon mdi mdi-plus-outline"></i>
-                    <span class="menu-title">Virement</span>
+                    <span class="menu-title">Virements</span>
                 </a>
             </li>
         {% else %}
@@ -55,6 +55,12 @@
                 <a class="nav-link" href="{% url 'crm:clients_accounts' %}">
                     <i class="menu-icon mdi mdi-account-box-outline"></i>
                     <span class="menu-title">Comptes Clients</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'crm:deposits' %}">
+                    <i class="menu-icon mdi mdi-plus-outline"></i>
+                    <span class="menu-title">Virements</span>
                 </a>
             </li>
         {% endif %}

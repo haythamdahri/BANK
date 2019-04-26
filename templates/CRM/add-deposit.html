@@ -1,0 +1,96 @@
+{% extends 'CRM/base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Virement bancaire{% endblock %}
+
+{% block content %}
+    <div class="main-panel">
+        <div class="content-wrapper">
+            <div class="row">
+                <div class="col-lg-12 d-flex align-items-stretch">
+
+                    <div class="row flex-grow">
+                        <div class="col-12 grid-margin stretch-card">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h4 class="card-title"><span class="mdi mdi-publish"></span> Virement</h4>
+                                    <p class="card-description font-weight-bold display-4">
+                                        <i class="far fa-money-bill-alt"></i> Virement du compte
+                                    </p>
+
+                                    <form method="POST" action="{% url 'crm:add_deposit' %}">
+
+                                        {% csrf_token %}
+
+                                        <div class="form-group">
+                                            <label>Compte</label>
+                                            <select name="account"
+                                                    class="form-control {% if deposit_form.account.errors %}is-invalid{% endif %}"
+                                                    required
+                                                    id="id_account">
+                                                {% for account in deposit_form.account.field.queryset %}
+                                                    {% if deposit_form.client.id == client.id %}
+                                                        <option value="{{ account.pk }}">
+                                                            Numero: {{ account.credit_card }} |
+                                                            Montant: {{ account.balance }} Dh
+                                                        </option>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </select>
+                                            {% for error in deposit_form.account.errors %}
+                                                <small class="form-text text-danger font-weight-bold">
+                                                    <i class="fas fa-exclamation-triangle"></i> {{ error }}<br>
+                                                </small>
+                                            {% endfor %}
+                                        </div>
+
+                                        <div class="form-group">
+                                            <div class="input-group">
+                                                <div class="input-group-prepend bg-primary border-primary">
+                                                    <span class="input-group-text bg-transparent text-white">DH</span>
+                                                </div>
+                                                {% if deposit_form.amount.errors %}
+                                                    {% render_field deposit_form.amount class='form-control is-invalid' %}
+                                                {% else %}
+                                                    {% render_field deposit_form.amount %}
+                                                {% endif %}
+                                                <div class="input-group-append bg-primary border-primary">
+                                                    <span class="input-group-text bg-transparent text-white">.00</span>
+                                                </div>
+                                            </div>
+                                            {% for error in deposit_form.amount.errors %}
+                                                <small class="form-text text-danger font-weight-bold">
+                                                    <i class="fas fa-exclamation-triangle"></i> {{ error }}<br>
+                                                </small>
+                                            {% endfor %}
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Mot de passe pour confirmer l'operation</label>
+                                            {% if deposit_form.password.errors %}
+                                                {% render_field deposit_form.password class='form-control is-invalid' %}
+                                            {% else %}
+                                                {% render_field deposit_form.password %}
+                                            {% endif %}
+                                            {% for error in deposit_form.password.errors %}
+                                                <small class="form-text text-danger font-weight-bold">
+                                                    <i class="fas fa-exclamation-triangle"></i> {{ error }}<br>
+                                                </small>
+                                            {% endfor %}
+                                        </div>
+
+                                        <button type="submit" class="btn btn-success mr-2">
+                                            <span class="mdi mdi-account-convert"></span> Effectuer
+                                        </button>
+                                    </form>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

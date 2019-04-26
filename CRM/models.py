@@ -49,6 +49,10 @@ class Client(models.Model):
     person = models.OneToOneField(Person, on_delete=models.CASCADE, related_name='person')
     creator = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True)
 
+    @property
+    def accounts_count(self):
+        return Account.objects.filter(client=self).count()
+
     def __str__(self):
         return self.person.__str__() + " | " + self.creator.person.user.__str__()
 

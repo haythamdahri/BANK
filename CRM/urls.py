@@ -17,6 +17,7 @@ urlpatterns = [
     path('withdrawals/', views.Withdrawals.as_view(), name="withdrawals"),
     path('withdrawals/add/', views.AddWithdrawal.as_view(), name="add_withdrawal"),
     path('deposits/', views.Deposits.as_view(), name="deposits"),
+    path('deposits/add/', views.AddDeposit.as_view(), name="add_deposit"),
     #------------------- Employee Features -------------------
     path('clients/', views.Clients.as_view(), name="clients"),
     path('clients/add', views.AddClient.as_view(), name="add_client"),

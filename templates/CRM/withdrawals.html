@@ -4,129 +4,137 @@
 {% block title %}Retraits{% endblock %}
 
 {% block content %}
-    <div class="main-panel">
+<div class="main-panel">
         <div class="content-wrapper">
             <div class="row">
                 <div class="col-lg-12 grid-margin stretch-card">
                     <div class="card">
                         <div class="card-body">
                             <div class="row">
-                                <div class="col-6 col-md-6 col-lg-6 col-xl-6 col-sm-12">
-                                    <h4 class="card-title">Liste des retraits</h4>
-                                </div>
-
-                                <div class="col-6 col-md-6 col-lg-6 col-xl-6 col-sm-12">
-                                    <form class="form-inline my-2 my-lg-0" method="GET"
-                                          action="{% url 'crm:withdrawals' %}">
-                                        {% render_field search_form.search %}
-                                        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">
-                                            <span class="mdi mdi-search-web"></span>Rechercher
-                                        </button>
-                                    </form>
-                                </div>
-                            </div>
-                            <a href="{% url 'crm:add_withdrawal' %}">
-                                <button type="button" class="btn btn-success btn-fw">
-                                    <span class="mdi mdi-tag-plus"></span> Retirer l'argent
-                                </button>
-                            </a>
-
-                            <div class="row mt-4">
-                                <div class="col-md-12">
-                                    {% include 'CRM/messages.html' %}
-                                </div>
+                            <div class="col-6 col-md-6 col-lg-6 col-xl-6 col-sm-12">
+                                <h4 class="card-title"><span class="mdi mdi-chart-line-stacked"></span> Liste des
+                                    retraits</h4>
                             </div>
 
-                            <div class="table-responsive">
-                                <table class="table table-striped">
-                                    <thead>
+                            <div class="col-6 col-md-6 col-lg-6 col-xl-6 col-sm-12">
+                                <form class="form-inline my-2 my-lg-0" method="GET"
+                                      action="{% url 'crm:withdrawals' %}">
+                                    {% render_field search_form.search %}
+                                    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">
+                                        <span class="mdi mdi-search-web"></span>Rechercher
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <a href="{% url 'crm:add_withdrawal' %}">
+                            <button type="button" class="btn btn-success btn-fw mb-3">
+                                <span class="mdi mdi-tag-plus"></span> Retirer l'argent
+                            </button>
+                        </a>
+
+                        <div class="row mt-4">
+                            <div class="col-md-12">
+                                {% include 'CRM/messages.html' %}
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                <tr align="center">
+                                    <th>
+                                        Numero du compte
+                                    </th>
+                                    <th>
+                                        Numero de transaction
+                                    </th>
+                                    <th>
+                                        Date d'operation
+                                    </th>
+                                    <th>
+                                        Montant
+                                    </th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for withdrawal in withdrawals.object_list %}
                                     <tr align="center">
-                                        <th>
-                                            Numero du compte
-                                        </th>
-                                        <th>
-                                            Numero de transaction
-                                        </th>
-                                        <th>
-                                            Date d'operation
-                                        </th>
-                                        <th>
-                                            Montant
-                                        </th>
+                                        <td class="py-1">
+                                            {{ withdrawal.account.credit_card }}
+                                        </td>
+                                        <td>
+                                            {{ withdrawal.number }}
+                                        </td>
+                                        <td>
+                                            {{ withdrawal.date | date:"l d b Y  G:i:s a" }}
+                                        </td>
+                                        <td>
+                                            {{ withdrawal.amount }} Dh
+                                        </td>
                                     </tr>
-                                    </thead>
-                                    <tbody>
-                                    {% for withdrawal in withdrawals.object_list %}
-                                        <tr align="center">
-                                            <td class="py-1">
-                                                {{ withdrawal.account.credit_card }}
-                                            </td>
-                                            <td>
-                                                {{ withdrawal.number }}
-                                            </td>
-                                            <td>
-                                                {{ withdrawal.date | date:"l d b Y  G:i:s a" }}
-                                            </td>
-                                            <td>
-                                                {{ withdrawal.amount }} Dh
-                                            </td>
-                                        </tr>
-                                    {% empty %}
-                                        <tr>
-                                            <td colspan="5">
-                                                <div class="alert alert-info text-center font-weight-bold">
-                                                    <span class="mdi mdi-alert-box"></span> Aucun Retrait n'a été
-                                                    éffectué
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="5">
+                                            <div class="alert alert-info text-center font-weight-bold">
+                                                <span class="mdi mdi-alert-box"></span> Aucun Retrait n'a été
+                                                éffectué
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
             </div>
-            {% if withdrawals.has_other_pages %}
-                <div class="row">
-                    <div class="col-12 text-center">
-                        <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
-                            {% if withdrawals.has_previous %}
-                                <div class="btn-group" role="group" aria-label="First group">
-                                    <a href="{% url 'crm:withdrawals' %}?page=1">
-                                        <button type="button" class="btn btn-light"><<</button>
-                                    </a>
-                                    <a href="{% url 'crm:withdrawals' %}?page={{ withdrawals.previous_page_number }}">
-                                        <button type="button" class="btn btn-light"><</button>
-                                    </a>
-                                </div>
-                            {% endif %}
-                            <div class="btn-group" role="group" aria-label="Second group">
-                                {% for page_num in withdrawals.paginator.page_range %}
-                                    {% if withdrawals.number == page_num %}
-                                        <button type="button" class="btn btn-primary active">{{ page_num }}</button>
-                                    {% else %}
-                                        <a href="{% url 'crm:withdrawals' %}?page={{ page_num }}">
-                                            <button type="button" class="btn btn-light">{{ page_num }}</button>
-                                        </a>
-                                    {% endif %}
-                                {% endfor %}
+        </div>
+
+
+        {% if withdrawals.has_other_pages %}
+            <div class="row">
+                <div class="col-12 text-center">
+                    <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                        {% if withdrawals.has_previous %}
+                            <div class="btn-group" role="group" aria-label="First group">
+                                <a href="{% url 'crm:withdrawals' %}?page=1{% if 'search' in request.GET %}&search={{ request.GET.search }}{% endif %}">
+                                    <button type="button" class="btn btn-light"><<</button>
+                                </a>
+                                <a href="{% url 'crm:withdrawals' %}?page=
+                                        {{ withdrawals.previous_page_number }}{% if 'search' in request.GET %}&search={{ request.GET.search }}{% endif %}">
+                                    <button type="button" class="btn btn-light"><</button>
+                                </a>
                             </div>
-                            {% if withdrawals.has_next %}
-                                <div class="btn-group" role="group" aria-label="Third group">
-                                    <a href="{% url 'crm:withdrawals' %}?page={{ withdrawals.next_page_number }}">
-                                        <button type="button" class="btn btn-light">></button>
+                        {% endif %}
+                        <div class="btn-group" role="group" aria-label="Second group">
+                            {% for page_num in withdrawals.paginator.page_range %}
+                                {% if withdrawals.number == page_num %}
+                                    <button type="button" class="btn btn-primary active">{{ page_num }}</button>
+                                {% else %}
+                                    <a href="{% url 'crm:withdrawals' %}?page=
+                                            {{ page_num }}{% if 'search' in request.GET %}&search={{ request.GET.search }}{% endif %}">
+                                        <button type="button" class="btn btn-light">{{ page_num }}</button>
                                     </a>
-                                    <a href="{% url 'crm:withdrawals' %}?page={{ withdrawals.paginator.num_pages }}">
-                                        <button type="button" class="btn btn-light">>></button>
-                                    </a>
-                                </div>
-                            {% endif %}
+                                {% endif %}
+                            {% endfor %}
                         </div>
+                        {% if withdrawals.has_next %}
+                            <div class="btn-group" role="group" aria-label="Third group">
+                                <a href="{% url 'crm:withdrawals' %}?page=
+                                        {{ withdrawals.next_page_number }}{% if 'search' in request.GET %}&search={{ request.GET.search }}{% endif %}">
+                                    <button type="button" class="btn btn-light">></button>
+                                </a>
+                                <a href="{% url 'crm:withdrawals' %}?page=
+                                        {{ withdrawals.paginator.num_pages }}{% if 'search' in request.GET %}&search={{ request.GET.search }}{% endif %}">
+                                    <button type="button" class="btn btn-light">>></button>
+                                </a>
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
-            {% endif %}
-        </div>
+            </div>
+        {% endif %}
+    </div>
     </div>
 {% endblock %}

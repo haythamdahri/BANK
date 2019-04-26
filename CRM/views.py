@@ -18,7 +18,7 @@ from django_countries.templatetags.countries import get_countries
 
 from CRM.forms import LoginForm, TransactionForm, SearchForm, WithdrawalForm, ClientSearchForm, ClientForm, \
     UserForm, PersonForm, ClientForm, ResetPasswordForm, AccountSettingsForm, AccountSearchForm, \
-    EditAccountForm, AddAccountForm
+    EditAccountForm, AddAccountForm, DepositForm
 from CRM.models import Transaction, Client, Employee, Account, Withdrawal, Deposit, generateTransactionId, Person
 from datetime import datetime, timedelta
 
@@ -59,6 +59,30 @@ def getUserStatistics(request):
         return (transactions_statistics, withdrawals_statistics, deposits_statistics, received_transaction_count)
     except:
         return (0, 0, 0)
+
+
+def getEmployeeStatistics(request):
+    try:
+        user = request.user
+        person = Person.objects.get(user=user)
+        employee = Employee.objects.get(person=person)
+        # ---------------- Transactions -------------------
+        clients_transactions_count = Transaction.objects.filter(sender_account__client__creator=employee).count()
+        all_transactions_count = Transaction.objects.all().count()
+        transactions_statistics = ((100 * clients_transactions_count) / all_transactions_count)
+        # ---------------- Withdrawals -------------------
+        clients_withdrawals_count = Withdrawal.objects.filter(account__client__creator=employee).count()
+        all_withdrawals_count = Withdrawal.objects.all().count()
+        withdrawals_statistics = ((100 * clients_withdrawals_count) / all_withdrawals_count)
+        # ---------------- Transactions -------------------
+        clients_deposits_count = Deposit.objects.filter(account__client__creator=employee).count()
+        all_deposits_count = Deposit.objects.all().count()
+        deposits_statistics = ((100 * clients_deposits_count) / all_deposits_count)
+
+        return (transactions_statistics, withdrawals_statistics, deposits_statistics, clients_transactions_count)
+    except Exception as ex:
+        print(ex)
+        return (0, 0, 0, 0)
 
 
 class Home(LoginRequiredMixin, View):
@@ -139,6 +163,15 @@ class Home(LoginRequiredMixin, View):
                 nb_withdrawals += temp_withdrawals.count()
                 w_b = temp_withdrawals.aggregate(Sum("amount"))["amount__sum"]
                 withdrawals_balance += w_b if w_b is not None else 0
+
+            # ----------- statistiques -------------
+            statistics = getEmployeeStatistics(request)
+
+            context["transactions_statistics"] = statistics[0]
+            context["withdrawals_statistics"] = statistics[1]
+            context["deposits_statistics"] = statistics[2]
+            context["clients_transactions_count"] = statistics[3]
+            context["today_year"] = datetime.year
 
             context["nb_clients"] = Client.objects.filter(creator=employee).count()
             context["total_balance"] = total_balance
@@ -279,20 +312,21 @@ class Deposits(LoginRequiredMixin, View):
     redirect_field_name = "next"
 
     def get(self, request, *args, **kwargs):
-        # generate_deposits(150)
-        user = request.user
-        client = Client()
         try:
-            client = Client.objects.get(person_id=user.person.id)
-        except Client.DoesNotExist as ex:
-            client = None
-        if client is not None:
+            user = request.user
+            client = Client()
+            try:
+                client = Client.objects.get(person_id=user.person.id)
+            except Client.DoesNotExist as ex:
+                client = None
             context = dict()
-            accounts = Account.objects.filter(client_id=client.id)
+            if client is not None:
+                accounts = Account.objects.filter(client_id=client.id)
+            else:
+                accounts = Account.objects.all()
             search_form = SearchForm(request.GET or None)
             if search_form.is_valid():
-                deposits = Deposit.objects.filter(account__in=accounts,
-                                                  number=search_form.cleaned_data["search"]).order_by("-date")
+                deposits = Deposit.objects.filter(Q(number=search_form.cleaned_data["search"]) | Q(account__credit_card=search_form.cleaned_data["search"]), account__in=accounts).order_by("-date")
             else:
                 deposits = Deposit.objects.filter(account__in=accounts).order_by("-date")
 
@@ -309,7 +343,9 @@ class Deposits(LoginRequiredMixin, View):
             context["search_form"] = search_form
             context["deposits"] = deposits
             return render(request, "CRM/deposits.html", context)
-        return redirect("crm:home")
+        except Exception as ex:
+            print(ex)
+            return redirect("crm:home")
 
 
 # -------------------------- Add Transaction --------------------------
@@ -408,6 +444,46 @@ class AddWithdrawal(LoginRequiredMixin, View):
         return redirect("crm:home")
 
 
+# -------------------------- Add Transaction --------------------------
+class AddDeposit(LoginRequiredMixin, View):
+    login_url = "/login/"
+    redirect_field_name = "next"
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        employee = Employee()
+        try:
+            employee = Employee.objects.get(person_id=user.person.id)
+        except Client.DoesNotExist as ex:
+            employee = None
+        if employee is not None:
+            context = dict()
+            context["deposit_form"] = DepositForm()
+            return render(request, "CRM/add-deposit.html", context)
+        return redirect("crm:home")
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        employee = Employee()
+        try:
+            employee = Employee.objects.get(person_id=user.person.id)
+        except Client.DoesNotExist as ex:
+            employee = None
+        if employee is not None:
+            context = dict()
+            form = DepositForm(request.POST or None)
+            if form.is_valid():
+                password = form.cleaned_data.get("password")
+                if check_password(password, user.password):
+                    form.save()
+                    messages.success(request, "Virement efféctué avec succée")
+                    return redirect("crm:deposits")
+                form.add_error("password", "Mot de passe invalide")
+            context["deposit_form"] = form
+            return render(request, "CRM/add-deposit.html", context)
+        return redirect("crm:home")
+
+
 # -------------------------- Clients(Only for employees) --------------------------
 class Clients(LoginRequiredMixin, View):
     login_url = "/login/"
@@ -433,9 +509,6 @@ class Clients(LoginRequiredMixin, View):
                                                     creator=employee)
             else:
                 clients = Client.objects.filter(creator=employee).order_by("-id")
-
-            for client in clients:
-                client.accounts_count = Account.objects.filter(client=client).count()
             # ------------- Get requested page -------------
             page = request.GET.get("page", 1)
             paginator = Paginator(clients, 10)
@@ -488,15 +561,16 @@ class AddClient(LoginRequiredMixin, View):
                     person = person_form.save(commit=False)
                     person.user = user
                     person.save()
-                    Client.objects.create(person=person, creator=employee)
+                    client = Client.objects.create(person=person, creator=employee)
+                    client.save()
+                    context['client'] = client
                     messages.success(request, "Compte client à été crée avec succé")
-                    return redirect("crm:clients")
+                    return render(request, "CRM/added-client.html", context)
                 else:
                     messages.error(request, "Données incorrectes, veuillez ressayer!")
             context["client_form"] = client_form
             return render(request, "CRM/add-client.html", context)
         return redirect("crm:home")
-
 
 # -------------------------- Reset Account Password --------------------------
 class ResetPassword(LoginRequiredMixin, View):
@@ -691,9 +765,10 @@ class ClientsAccounts(LoginRequiredMixin, View):
                 context["accounts"] = accounts
                 context["now"] = datetime.today()
                 return render(request, "CRM/clients-accounts.html", context)
-            return redirect("crm:home")
-        except:
-            return redirect("crm:home")
+            return redirect("crm:clients_accounts")
+        except Exception as ex:
+            print(ex)
+            return redirect("crm:clients_accounts")
 
 
 # -------------------------- Account Delete --------------------------
@@ -759,8 +834,9 @@ class AddAccount(LoginRequiredMixin, View):
                 instance = account_form.save(commit=False)
                 instance.creator = employee
                 instance.save()
+                context['account'] = instance
                 messages.success(request, "Le compte client est crée avec succé")
-                return redirect("crm:clients_accounts")
+                return render(request, "CRM/added-client-account.html", context)
             else:
                 context["account_form"] = account_form
                 return render(request, "CRM/add-account.html", context)

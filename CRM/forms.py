@@ -63,13 +63,13 @@ class TransactionForm(forms.ModelForm):
 
 class SearchForm(forms.Form):
     search = forms.CharField(widget=forms.TextInput(
-        attrs={"class": "form-control mr-sm-2", "type": "search", "placeholder": "Numero de transaction ...",
+        attrs={"class": "form-control mr-sm-2", "type": "search", "placeholder": "Numero de transaction ou du compte...",
                "aria-label": "Search"}), required=True)
 
 
 class AccountSearchForm(forms.Form):
-    search = forms.CharField(widget=forms.TextInput(
-        attrs={"class": "form-control mr-sm-2", "type": "search", "placeholder": "Numero du compte ou de la carte...",
+    search = forms.CharField(widget=forms.NumberInput(
+        attrs={"class": "form-control mr-sm-2", "placeholder": "Numero du compte ou de la carte...",
                "aria-label": "Search"}), required=True)
 
 
@@ -121,11 +121,9 @@ class DepositForm(forms.ModelForm):
     def clean(self):
         try:
             cleaned_data = super().clean()
-            account = cleaned_data.get("account")
             amount = cleaned_data.get("amount")
-            print(f"Account: {account}")
-            if amount <= 100 or amount > 3000:
-                self.add_error("amount", "Montant invalide (100 < Montant < 3000)")
+            if amount <= 100 or amount > 4500:
+                self.add_error("amount", "Montant invalide (100 < Montant < 4500)")
         except:
             pass
 
@@ -203,7 +201,7 @@ class ClientForm(forms.Form):
                 self.add_error("nationality", "La nationalité selectionné n'est pas valide!")
             if User.objects.filter(username=username).exists():
                 self.add_error("username", "Nom d'utilisateur déja utilisé!")
-            if birth_date > datetime.now().date():
+            if birth_date > datetime.date.today():
                 self.add_error("birth_date", "Date de naissance invalide, choisir une date valide!")
         except Exception as e:
             pass
@@ -259,7 +257,7 @@ class AccountSettingsForm(forms.Form):
             codes = [code for code, country in get_countries()]
             if nationality not in codes:
                 self.add_error("nationality", "La nationalité selectionné n'est pas valide!")
-            if birth_date > datetime.now().date():
+            if birth_date > datetime.date.today():
                 self.add_error("birth_date", "Date de naissance invalide, choisir une date valide!")
         except Exception as ex:
             pass
