@@ -60,21 +60,21 @@
                                     </thead>
                                     <tbody>
                                     {% for transaction in transactions.object_list %}
-                                        {% include 'CRM/parts/transaction_modal.html' %}
+                                        {% include 'CRM/parts/transaction-modal.html' %}
                                         <tr>
                                             <td class="py-1">
                                                 <span class="mdi mdi-account"></span>{{ transaction.number }}
                                             </td>
                                             <td align="center">
                                                 <a href="javascript:void(0)" data-toggle="modal"
-                                                   data-target="#senderModal{{ transaction.pk }}">
+                                                   data-target="#sender_modal{{ transaction.pk }}">
                                                     <img src="{{ transaction.sender_account.client.person.image.url }}"
                                                          alt="{{ transaction.sender_account.client.person.full_name }}"> {{ transaction.sender_account.credit_card }}
                                                 </a>
                                             </td>
                                             <td align="center">
                                                 <a href="javascript:void(0)" data-toggle="modal"
-                                                   data-target="#receiverModal{{ transaction.pk }}">
+                                                   data-target="#receiver-modal{{ transaction.pk }}">
                                                     <img src="{{ transaction.receiver_account.client.person.image.url }}"
                                                          alt="{{ transaction.receiver_account.client.person.full_name }}"> {{ transaction.receiver_account.credit_card }}
                                                 </a>

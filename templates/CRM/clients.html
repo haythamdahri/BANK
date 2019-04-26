@@ -12,7 +12,7 @@
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-6 col-md-6 col-lg-6 col-xl-6 col-sm-12">
-                                    <h4 class="card-title">Liste des clients</h4>
+                                    <h4 class="card-title"><i class="fas fa-user-circle"></i> Liste des clients</h4>
                                 </div>
 
                                 <div class="col-6 col-md-6 col-lg-6 col-xl-6 col-sm-12">
@@ -58,7 +58,7 @@
                                     </thead>
                                     <tbody>
                                     {% for client in clients.object_list %}
-                                        {% include 'CRM/parts/client_modal.html' %}
+                                        {% include 'CRM/parts/client-modal.html' %}
                                         <tr align="center">
                                             <td class="py-1">
                                                 <span class="mdi mdi-account"></span>{{ client.id }}
@@ -71,8 +71,8 @@
                                             </td>
                                             <td align="center">
                                                 <button class="btn btn-success btn-sm" data-toggle="modal"
-                                                        data-target="#clientModal{{ client.pk }}"><span
-                                                        class="mdi mdi-account-card-details"></span>Détails
+                                                        data-target="#client-modal{{ client.pk }}"><span
+                                                        class="mdi mdi-account-card-details"></span> Détails
                                                 </button>
                                             </td>
                                         </tr>
@@ -80,7 +80,7 @@
                                         <tr>
                                             <td colspan="6">
                                                 <div class="alert alert-info text-center font-weight-bold">
-                                                    <span class="mdi mdi-alert-box"></span> Aucune Client n'a été
+                                                    <span class="mdi mdi-alert-box"></span> Aucun Client n'a été
                                                     trouvé!
                                                 </div>
                                             </td>

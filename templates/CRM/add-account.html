@@ -1,0 +1,106 @@
+{% extends 'CRM/base.html' %}
+{% load widget_tweaks %}
+
+
+{% block title %}Ajout du compte client{% endblock %}
+
+{% block content %}
+    <div class="main-panel">
+        <div class="content-wrapper">
+            <div class="row">
+                <div class="col-lg-12 d-flex align-items-stretch">
+
+                    <div class="row flex-grow">
+                        <div class="col-12 grid-margin stretch-card">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h4 class="card-title">Ajouter un nouveau compte client</h4>
+                                    <p class="card-description font-weight-bold display-4">
+                                        <i class="far fa-user"></i> Remplissage des informations compte
+                                        client
+                                    </p>
+
+                                    <!-- @Messages section -->
+                                    {% include 'CRM/messages.html' %}
+
+                                    <form method="POST" action="{% url 'crm:add_account' %}">
+
+                                        {% csrf_token %}
+
+                                        {# Client #}
+                                        <div class="form-group">
+                                            <label>Client</label>
+                                            {% if account_form.client.errors %}
+                                                {% render_field account_form.client class='form-control is-invalid' %}
+                                            {% else %}
+                                                {% render_field account_form.client %}
+                                            {% endif %}
+                                            {% for error in  account_form.client.errors %}
+                                                <small class="form-text text-danger font-weight-bold">
+                                                    <i class="fas fa-exclamation-triangle"></i> {{ error }}<br>
+                                                </small>
+                                            {% endfor %}
+                                        </div>
+
+                                        {# Montant #}
+                                        <div class="form-group">
+                                            <label>Montant</label>
+                                            {% if account_form.username.errors %}
+                                                {% render_field account_form.balance class='form-control is-invalid' %}
+                                            {% else %}
+                                                {% render_field account_form.balance %}
+                                            {% endif %}
+                                            {% for error in account_form.balance.errors %}
+                                                <small class="form-text text-danger font-weight-bold">
+                                                    <i class="fas fa-exclamation-triangle"></i> {{ error }}<br>
+                                                </small>
+                                            {% endfor %}
+                                        </div>
+
+
+                                        {# Opening Balance #}
+                                        <div class="form-group">
+                                            <label>Montant d'ouverture</label>
+                                            {% if account_form.opening_balance.errors %}
+                                                {% render_field account_form.opening_balance class='form-control is-invalid' %}
+                                            {% else %}
+                                                {% render_field account_form.opening_balance %}
+                                            {% endif %}
+                                            {% for error in account_form.opening_balance.errors %}
+                                                <small class="form-text text-danger font-weight-bold">
+                                                    <i class="fas fa-exclamation-triangle"></i> {{ error }}<br>
+                                                </small>
+                                            {% endfor %}
+                                        </div>
+
+                                            <button type="submit" class="btn btn-success mr-2">
+                                                <span class="mdi mdi-account-check"></span> Sauvegarder
+                                            </button>
+                                    </form>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+    {{ block.super }}
+    <script>
+        $(document).ready(function () {
+            $(function () {
+                $("#opening_date_timepicker").datepicker({
+                    format: 'yyyy-mm-dd',
+                });
+                $("#expiration_date_timepicker").datepicker({
+                    format: 'yyyy-mm-dd',
+                });
+            });
+        });
+    </script>
+{% endblock %}

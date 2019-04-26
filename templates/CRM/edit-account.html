@@ -1,0 +1,120 @@
+{% extends 'CRM/base.html' %}
+{% load widget_tweaks %}
+
+
+{% block title %}Modification compte client{% endblock %}
+
+{% block content %}
+    <div class="main-panel">
+        <div class="content-wrapper">
+            <div class="row">
+                <div class="col-lg-12 d-flex align-items-stretch">
+
+                    <div class="row flex-grow">
+                        <div class="col-12 grid-margin stretch-card">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h4 class="card-title">Modification compte client</h4>
+                                    <p class="card-description font-weight-bold display-4">
+                                        <i class="far fa-user"></i> Modification des informations compte
+                                        client
+                                    </p>
+
+                                    <!-- @Messages section -->
+                                    {% include 'CRM/messages.html' %}
+
+                                    <form method="POST" action="{% url 'crm:edit_account' account.pk %}">
+
+                                        {% csrf_token %}
+
+                                        {# Montant #}
+                                        <div class="form-group">
+                                            <label>Montant</label>
+                                            {% if account_form.balance.errors %}
+                                                {% render_field account_form.balance class='form-control is-invalid' %}
+                                            {% else %}
+                                                {% render_field account_form.balance %}
+                                            {% endif %}
+                                            {% for error in account_form.balance.errors %}
+                                                <small class="form-text text-danger font-weight-bold">
+                                                    <i class="fas fa-exclamation-triangle"></i> {{ error }}<br>
+                                                </small>
+                                            {% endfor %}
+                                        </div>
+
+                                        {# Expiration Date #}
+                                        <div class="form-group">
+                                            <label>Date d'expiration</label>
+                                            {% if account_form.expiration_date.errors %}
+                                                {% render_field account_form.expiration_date class='form-control is-invalid' %}
+                                            {% else %}
+                                                {% render_field account_form.expiration_date %}
+                                            {% endif %}
+                                            {% for error in account_form.expiration_date.errors %}
+                                                <small class="form-text text-danger font-weight-bold">
+                                                    <i class="fas fa-exclamation-triangle"></i> {{ error }}<br>
+                                                </small>
+                                            {% endfor %}
+                                        </div>
+
+                                        {# Opening Balnce #}
+                                        <div class="form-group">
+                                            <label>Montant d'ouverture</label>
+                                            {% if account_form.opening_balance.errors %}
+                                                {% render_field account_form.opening_balance class='form-control is-invalid' %}
+                                            {% else %}
+                                                {% render_field account_form.opening_balance %}
+                                            {% endif %}
+                                            {% for error in account_form.opening_balance.errors %}
+                                                <small class="form-text text-danger font-weight-bold">
+                                                    <i class="fas fa-exclamation-triangle"></i> {{ error }}<br>
+                                                </small>
+                                            {% endfor %}
+                                        </div>
+
+                                        {# Opening date #}
+                                        <div class="form-group">
+                                            <label>Date d'ouverture</label>
+                                            {% if account_form.opening_date.errors %}
+                                                {% render_field account_form.opening_date class='form-control is-invalid' %}
+                                            {% else %}
+                                                {% render_field account_form.opening_date %}
+                                            {% endif %}
+                                            {% for error in account_form.opening_date.errors %}
+                                                <small class="form-text text-danger font-weight-bold">
+                                                    <i class="fas fa-exclamation-triangle"></i> {{ error }}<br>
+                                                </small>
+                                            {% endfor %}
+                                        </div>
+
+                                        <button type="submit" class="btn btn-success mr-2">
+                                            <span class="mdi mdi-account-check"></span> Sauvegarder
+                                        </button>
+                                    </form>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+    {{ block.super }}
+    <script>
+        $(document).ready(function () {
+            $(function () {
+                $("#opening_date_timepicker").datepicker({
+                    format: 'yyyy-mm-dd',
+                });
+                $("#expiration_date_timepicker").datepicker({
+                    format: 'yyyy-mm-dd',
+                });
+            });
+        });
+    </script>
+{% endblock %}

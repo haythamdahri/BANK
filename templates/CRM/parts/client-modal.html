@@ -1,0 +1,137 @@
+<!-- Large modal -->
+<div class="modal fade" id="client-modal{{ client.pk }}" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{ client.person.user.username }}
+                    | {{ client.person.full_name }}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="card">
+                    <div class="row">
+                        <div class="col-3 col-md-3 col-lg-3 col-xl-3 col-sm-12">
+                            <img style=" max-height: 16em; width: 16em; " class="img-thumbnail"
+                                 src="{{ client.person.image.url }}"
+                                 alt="Card image cap">
+                        </div>
+                        <div class="col-9 col-md-9 col-lg-9 col-xl-9 col-sm-12">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item">
+                                    <div class="row">
+                                        <div class="col-md-6 col-lg-6 col-xl-6 col-sm-12">
+                                            <b class="border-bottom border-dark">Nom d'utilisateur:</b>
+                                        </div>
+                                        <div class="col-md-6 col-lg-6 col-xl-6 col-sm-12">
+                                            {{ client.person.user.username }}
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="list-group-item">
+                                    <div class="row">
+                                        <div class="col-md-6 col-lg-6 col-xl-6 col-sm-12">
+                                            <b class="border-bottom border-dark">Nom complet:</b>
+                                        </div>
+                                        <div class="col-md-6 col-lg-6 col-xl-6 col-sm-12">
+                                            {{ client.person.full_name }}
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="list-group-item">
+                                    <div class="row">
+                                        <div class="col-md-6 col-lg-6 col-xl-6 col-sm-12">
+                                            <b class="border-bottom border-dark">Cin:</b>
+                                        </div>
+                                        <div class="col-md-6 col-lg-6 col-xl-6 col-sm-12">
+                                            {{ client.person.cin }}
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="list-group-item">
+                                    <div class="row">
+                                        <div class="col-md-6 col-lg-6 col-xl-6 col-sm-12">
+                                            <b class="border-bottom border-dark">Nombre des comptes: </b>
+                                        </div>
+                                        <div class="col-md-6 col-lg-6 col-xl-6 col-sm-12">
+                                            {{ client.accounts_count }}
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="list-group-item">
+                                    <div class="row">
+                                        <div class="col-md-6 col-lg-6 col-xl-6 col-sm-12">
+                                            <b class="border-bottom border-dark">Nom: </b>
+                                        </div>
+                                        <div class="col-md-6 col-lg-6 col-xl-6 col-sm-12">
+                                            {{ client.person.user.first_name }}
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="list-group-item">
+                                    <div class="row">
+                                        <div class="col-6 col-md-6 col-lg-6 col-xl-6 col-sm-12">
+                                            <b class="border-bottom border-dark">Prénom: </b>
+                                        </div>
+                                        <div class="col-6 col-md-6 col-lg-6 col-xl-6 col-sm-12">
+                                            {{ client.person.user.last_name }}
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="list-group-item">
+                                    <div class="row">
+                                        <div class="col-md-6 col-lg-6 col-xl-6 col-sm-12">
+                                            <b class="border-bottom border-dark">Date de naissance: </b>
+                                        </div>
+                                        <div class="col-md-6 col-lg-6 col-xl-6 col-sm-12">
+                                            {{ client.person.birth_date|date:"d/m/Y" }}
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="list-group-item">
+                                    <div class="row">
+                                        <div class="col-md-6 col-lg-6 col-xl-6 col-sm-12">
+                                            <b class="border-bottom border-dark">Ville: </b>
+                                        </div>
+                                        <div class="col-md-6 col-lg-6 col-xl-6 col-sm-12">
+                                            {{ client.person.city }}
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="list-group-item">
+                                    <div class="row">
+                                        <div class="col-md-6 col-lg-6 col-xl-6 col-sm-12">
+                                            <b class="border-bottom border-dark">Région: </b>
+                                        </div>
+                                        <div class="col-md-6 col-lg-6 col-xl-6 col-sm-12">
+                                            {{ client.person.state }}
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="list-group-item">
+                                    <div class="row">
+                                        <div class="col-md-6 col-lg-6 col-xl-6 col-sm-12">
+                                            <b class="border-bottom border-dark mr-5">Nationalité: </b>
+                                        </div>
+                                        <div class="col-md-6 col-lg-6 col-xl-6 col-sm-12">
+                                            {{ client.person.nationality }}
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal"><span
+                        class="mdi mdi-close-box"></span> Fermer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+

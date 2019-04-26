@@ -32,7 +32,7 @@
                                         <div class="form-group">
                                             <label>Compte Emetteur</label>
                                             <select name="sender_account"
-                                                    class="form-control form-control-sm {% if transaction_form.sender_account.errors %}is-invalid{% endif %}"
+                                                    class="form-control {% if transaction_form.sender_account.errors %}is-invalid{% endif %}"
                                                     required
                                                     id="id_sender_account">
                                                 {% for account in transaction_form.sender_account.field.queryset %}
@@ -54,7 +54,7 @@
                                         <div class="form-group">
                                             <label>Compte Recepteur</label>
                                             <select name="receiver_account"
-                                                    class="form-control form-control-sm {% if transaction_form.receiver_account.errors %}is-invalid{% endif %}"
+                                                    class="form-control {% if transaction_form.receiver_account.errors %}is-invalid{% endif %}"
                                                     required
                                                     id="id_receiver_account">
                                                 {% for account in transaction_form.receiver_account.field.queryset %}

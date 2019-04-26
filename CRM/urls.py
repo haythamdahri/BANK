@@ -24,4 +24,8 @@ urlpatterns = [
     path('password-reset/', views.ResetPassword.as_view(), name="password_reset"),
     path('account-settings/', views.AccountSettings.as_view(), name="account_settings"),
     path('accounts/', views.Accounts.as_view(), name="accounts"),
+    path('clients-accounts/', views.ClientsAccounts.as_view(), name="clients_accounts"),
+    path('delete-account/', views.DeleteAccount.as_view(), name="delete_account"),
+    path('add-account/', views.AddAccount.as_view(), name="add_account"),
+    path('edit-account/<int:id>/', views.EditAccount.as_view(), name="edit_account"),
 ]

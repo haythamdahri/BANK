@@ -25,7 +25,7 @@
                                         <div class="form-group">
                                             <label>Compte Emetteur</label>
                                             <select name="account"
-                                                    class="form-control form-control-sm {% if withdrawal_form.account.errors %}is-invalid{% endif %}"
+                                                    class="form-control {% if withdrawal_form.account.errors %}is-invalid{% endif %}"
                                                     required
                                                     id="id_account">
                                                 {% for account in withdrawal_form.account.field.queryset %}

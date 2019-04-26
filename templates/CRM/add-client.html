@@ -2,7 +2,7 @@
 {% load widget_tweaks %}
 
 
-{% block title %}Créer Compte Client{% endblock %}
+{% block title %}Ajouter Un Nouveau Client{% endblock %}
 
 {% block content %}
     <div class="main-panel">
@@ -14,9 +14,9 @@
                         <div class="col-12 grid-margin stretch-card">
                             <div class="card">
                                 <div class="card-body">
-                                    <h4 class="card-title">Transaction</h4>
+                                    <h4 class="card-title">Nouveau Client</h4>
                                     <p class="card-description font-weight-bold display-4">
-                                        <i class="far fa-money-bill-alt"></i> Creation compte client
+                                        <i class="far fa-money-bill-alt"></i> Creation d'un nouveau client
                                     </p>
 
                                     <!-- @Messages section -->
@@ -205,7 +205,7 @@
                                         <div class="form-group">
                                             <label>Nationalité</label>
                                             {% if client_form.nationality.errors %}
-                                                {% render_field client_form.nationality class='form-control form-control-sm is-invalid' %}
+                                                {% render_field client_form.nationality class='form-control is-invalid' %}
                                             {% else %}
                                                 {% render_field client_form.nationality %}
                                             {% endif %}
