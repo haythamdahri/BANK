@@ -1,0 +1,16 @@
+Pour commencer, il faut:
+1) Activer l'environnement virtuel:               
+## SOUS LINUX
+# source venv/bin/activate
+## SOUS WINDOWS
+# workon venv/bin/activate
+
+Si vous trouverez des problèmes, il faut recreer un nouveau environnement virtuel et l'activer par la suite.
+
+2) Installer les packages necessaires
+# pip3 install -r requirements.txt
+le fichier requirements.txt est accompagné avec le projet.
+
+3) Lancer le serveur:
+# python3 manage.py runserver
+
