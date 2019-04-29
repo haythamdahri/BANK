@@ -265,11 +265,11 @@ class AccountSettingsForm(forms.Form):
 class EditAccountForm(forms.ModelForm):
     balance = forms.CharField(required=True,
                            widget=forms.NumberInput(attrs={"class": "form-control", "placeholder": "Montant"}))
-    expiration_date = forms.DateField(required=True, widget=forms.DateInput(format="%Y-%m-%d",
+    expiration_date = forms.DateField(required=True, input_formats=["%m/%d/%Y"], widget=forms.DateInput(
         attrs={"class": "form-control", "id": "expiration_date_timepicker", "placeholder": "Date d'expiration"}))
     opening_balance = forms.CharField(required=True,
                            widget=forms.NumberInput(attrs={"class": "form-control", "placeholder": "Montant d'ouverture"}))
-    opening_date = forms.DateField(required=True, widget=forms.DateInput(format="%Y-%m-%d",
+    opening_date = forms.DateField(required=True, input_formats=["%m-%d-%Y"], widget=forms.DateInput(
         attrs={"class": "form-control", "id": "opening_date_timepicker", "placeholder": "Date d'ouverture"}))
     class Meta:
         model = Account
@@ -283,15 +283,14 @@ class EditAccountForm(forms.ModelForm):
         opening_date = cleaned_data.get("opening_date")
         try:
             if expiration_date < datetime.date.today():
-                self.expiration_date("expiration_date", "La date d'éxpiration n'est pas valide pour un compte")
+                self.add_error("expiration_date", "La date d'éxpiration n'est pas valide pour un compte")
         except Exception as ex:
-            print(ex)
-            self.expiration_date("expiration_date", "La date d'éxpiration n'est pas valide pour un compte")
+            self.add_error("expiration_date", "La date d'éxpiration n'est pas valide pour un compte")
         try:
-            if opening_date < datetime.date.today():
-                self.expiration_date("opening_date", "La date d'ouverture n'est pas valide pour un compte")
-        except:
-            self.expiration_date("opening_date", "La date d'ouverture n'est pas valide pour un compte")
+            if opening_date > datetime.date.today():
+                self.add_error("opening_date", "La date d'ouverture n'est pas valide pour un compte")
+        except Exception as ex:
+            self.add_error("opening_date", "La date d'ouverture n'est pas valide pour un compte")
         try:
             if float(opening_balance) < 100:
                 self.add_error("opening_balance", "Le montant d'ouverture du compte  doit être superieur a 100 Dhs")

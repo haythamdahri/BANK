@@ -326,7 +326,8 @@ class Deposits(LoginRequiredMixin, View):
                 accounts = Account.objects.all()
             search_form = SearchForm(request.GET or None)
             if search_form.is_valid():
-                deposits = Deposit.objects.filter(Q(number=search_form.cleaned_data["search"]) | Q(account__credit_card=search_form.cleaned_data["search"]), account__in=accounts).order_by("-date")
+                deposits = Deposit.objects.filter(Q(number=search_form.cleaned_data["search"]) | Q(
+                    account__credit_card=search_form.cleaned_data["search"]), account__in=accounts).order_by("-date")
             else:
                 deposits = Deposit.objects.filter(account__in=accounts).order_by("-date")
 
@@ -572,6 +573,7 @@ class AddClient(LoginRequiredMixin, View):
             return render(request, "CRM/add-client.html", context)
         return redirect("crm:home")
 
+
 # -------------------------- Reset Account Password --------------------------
 class ResetPassword(LoginRequiredMixin, View):
     login_url = "/login/"
@@ -747,7 +749,8 @@ class ClientsAccounts(LoginRequiredMixin, View):
                 search_form = AccountSearchForm(request.GET)
                 if search_form.is_valid():
                     accounts = Account.objects.filter(Q(id=search_form.cleaned_data.get("search")) | Q(
-                        credit_card=search_form.cleaned_data.get("search")), client__creator=employee).order_by("opening_date")
+                        credit_card=search_form.cleaned_data.get("search")), client__creator=employee).order_by(
+                        "opening_date")
                 else:
                     accounts = Account.objects.filter(client__creator=employee).order_by("opening_date")
 
@@ -861,9 +864,10 @@ class EditAccount(LoginRequiredMixin, View):
                 account = Account.objects.get(pk=id)
                 if account.client.creator == employee:
                     context = dict()
-                    initial = {"opening_date": account.opening_date,
+                    initial = {"opening_date": account.opening_date.strftime("%m-%d-%Y"),
                                "opening_balance": account.opening_balance,
-                               "expiration_date": account.expiration_date, "balance": account.balance,
+                               "expiration_date": account.expiration_date.strftime("%m-%d-%Y"),
+                               "balance": account.balance,
                                "credit_card": account.credit_card}
                     account_form = EditAccountForm(initial=initial)
                     context["account_form"] = account_form
@@ -874,12 +878,12 @@ class EditAccount(LoginRequiredMixin, View):
                 messages.warning(request, "Accés refusé!")
                 return redirect("crm:clients_accounts")
             except Exception as ex:
-                print(ex)
-                messages.error(request, "Le compte client n\"éxiste pas!")
+                messages.error(request, "Une erreur est survenue, veuillez ressayer!")
                 return redirect("crm:clients_accounts")
         return redirect("crm:home")
 
     def post(self, request, id, *args, **kwargs):
+        print(request.POST)
         user = request.user
         employee = Employee()
         try:
@@ -904,11 +908,11 @@ class EditAccount(LoginRequiredMixin, View):
                     context["account"] = account
                     return render(request, "CRM/edit-account.html", context)
                 # ---------- Si le createur n'est pas l'employee courant connecté
-                messages.warning(request, "Le compte client s\"appartient à un client que vous n\"avez pas crée!")
+                messages.warning(request, "Le compte client s'appartient à un client que vous n'avez pas crée!")
                 messages.warning(request, "Accés refusé!")
                 return redirect("crm:clients_accounts")
             except Exception as ex:
                 print(ex)
-                messages.error(request, "Le compte client n\"éxiste pas!")
+                messages.error(request, "Une erreur est survenue, veuillez ressayer!")
                 return redirect("crm:clients_accounts")
         return redirect("crm:home")
