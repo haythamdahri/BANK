@@ -72,8 +72,11 @@
                                             </td>
                                         </tr>
                                     {% empty %}
-                                        <tr class="alert alert-info">
-                                            <i class="fas fa-exclamation"></i> Aucun compte n'a été trouvé!
+                                        <tr>
+                                            <td colspan="7">
+                                                <div class="alert alert-info text-center font-weight-bold">
+                                                <i class="fas fa-exclamation"></i> Aucun compte n'a été trouvé!
+                                            </tr>
                                         </tr>
                                     {% endfor %}
                                     </tbody>
