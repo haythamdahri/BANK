@@ -77,8 +77,7 @@
                                     <tr>
                                         <td colspan="5">
                                             <div class="alert alert-info text-center font-weight-bold">
-                                                <span class="mdi mdi-alert-box"></span> Aucun Retrait n'a été
-                                                éffectué
+                                                <span class="mdi mdi-alert-box"></span> Aucun Retrait n'a été éffectué
                                             </div>
                                         </td>
                                     </tr>
@@ -101,8 +100,7 @@
                                 <a href="{% url 'crm:withdrawals' %}?page=1{% if 'search' in request.GET %}&search={{ request.GET.search }}{% endif %}">
                                     <button type="button" class="btn btn-light"><<</button>
                                 </a>
-                                <a href="{% url 'crm:withdrawals' %}?page=
-                                        {{ withdrawals.previous_page_number }}{% if 'search' in request.GET %}&search={{ request.GET.search }}{% endif %}">
+                                <a href="{% url 'crm:withdrawals' %}?page={{ withdrawals.previous_page_number }}{% if 'search' in request.GET %}&search={{ request.GET.search }}{% endif %}">
                                     <button type="button" class="btn btn-light"><</button>
                                 </a>
                             </div>
@@ -112,8 +110,7 @@
                                 {% if withdrawals.number == page_num %}
                                     <button type="button" class="btn btn-primary active">{{ page_num }}</button>
                                 {% else %}
-                                    <a href="{% url 'crm:withdrawals' %}?page=
-                                            {{ page_num }}{% if 'search' in request.GET %}&search={{ request.GET.search }}{% endif %}">
+                                    <a href="{% url 'crm:withdrawals' %}?page={{ page_num }}{% if 'search' in request.GET %}&search={{ request.GET.search }}{% endif %}">
                                         <button type="button" class="btn btn-light">{{ page_num }}</button>
                                     </a>
                                 {% endif %}
@@ -121,12 +118,10 @@
                         </div>
                         {% if withdrawals.has_next %}
                             <div class="btn-group" role="group" aria-label="Third group">
-                                <a href="{% url 'crm:withdrawals' %}?page=
-                                        {{ withdrawals.next_page_number }}{% if 'search' in request.GET %}&search={{ request.GET.search }}{% endif %}">
+                                <a href="{% url 'crm:withdrawals' %}?page={{ withdrawals.next_page_number }}{% if 'search' in request.GET %}&search={{ request.GET.search }}{% endif %}">
                                     <button type="button" class="btn btn-light">></button>
                                 </a>
-                                <a href="{% url 'crm:withdrawals' %}?page=
-                                        {{ withdrawals.paginator.num_pages }}{% if 'search' in request.GET %}&search={{ request.GET.search }}{% endif %}">
+                                <a href="{% url 'crm:withdrawals' %}?page={{ withdrawals.paginator.num_pages }}{% if 'search' in request.GET %}&search={{ request.GET.search }}{% endif %}">
                                     <button type="button" class="btn btn-light">>></button>
                                 </a>
                             </div>

@@ -648,7 +648,7 @@ class AccountSettings(LoginRequiredMixin, View):
                     messages.error(request, "Données invalides, veuillez corriger les erreurs puis ressayer!")
                 elif User.objects.filter(~Q(id=user.id), email__iexact=account_form.cleaned_data.get(
                         "email")).exists() and account_form.cleaned_data.get("email") != user.email:
-                    account_form.add_error("email", "L\"adresse Email est déja utilisée")
+                    account_form.add_error("email", "L'adresse Email est déja utilisée")
                     messages.error(request, "Données invalides, veuillez corriger les erreurs puis ressayer!")
                 elif Person.objects.filter(~Q(user_id=user.id), cin__iexact=account_form.cleaned_data.get(
                         "cin")).exists() and account_form.cleaned_data.get("cin") != person.cin:
